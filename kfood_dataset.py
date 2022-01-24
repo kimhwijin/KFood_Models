@@ -1,33 +1,52 @@
+from random import shuffle
 import tensorflow as tf
 import numpy as np
-from tensorflow import keras
 import os
 from pathlib import Path
 import matplotlib.pyplot as plt
-import matplotlib as mpl
-import csv
+from glob import glob
 
 IMAGE_SIZE = (299, 299)
 BATCH_SIZE = 32
+
 #데이터셋
 DATASET_NAME = 'kfood'
 DRIVE_PATH = Path(os.getcwd())
 DATASET_PATH = DRIVE_PATH / DATASET_NAME
 filepath = DATASET_PATH
-print(filepath.exists())
+print('dataset path :', DATASET_PATH ,filepath.exists())
+
+def make_class_to_label_file():
+    class_paths = list(glob(str(filepath) + '*/*/*'))
+    class_names = [class_path.split('/')[-1] for class_path in class_paths]
+    class_names = sorted(class_names)
+    with open(DRIVE_PATH / 'class_to_label.txt', 'w', encoding='utf8') as f:
+        for label, class_name in enumerate(class_names):
+            f.write(str(label) + ',' + class_name + '\n')
+
+
+if os.path.exists(DRIVE_PATH / 'class_to_label.txt'):
+    make_class_to_label_file()
 
 #class_label 매칭 딕셔너리로 저장
-labels = None
-classes = None
-with open(filepath / 'class_label.csv','r') as f:
-    w = csv.reader(f)
-    classes = w.__next__()
-    labels = w.__next__()
+LABELS = []
+CLASSES = []
+with open('class_to_label.txt','r', encoding='utf8') as f:
+    for line in f.readlines():
+        _label, _class = line.strip().split(',')
+        LABELS.append(int(_label))
+        CLASSES.append(_class)
 #print(len(classes), len(labels), classes, labels)
-class_to_label = {}
-for _class, _label in zip(classes, labels):
-    class_to_label[_class] = int(_label)
-tf_class_to_label = tf.constant(list(class_to_label.keys()))
+#class_to_label = {}
+#for _class, _label in zip(classes, labels):
+#    class_to_label[_class] = int(_label)
+LABELS = tuple(LABELS)
+CLASSES = tuple(CLASSES)
+if len(LABELS) == len(CLASSES):
+    n_labels = len(LABELS)
+
+
+
 
 def get_image_crop_points(filepath):
     crops = {}
@@ -57,15 +76,19 @@ for class_name in class_list:
 tf_crop_image_names = tf.constant(list(crop_points.keys()), dtype=tf.string)
 tf_crop_points = tf.constant(list(crop_points.values()))
 
-#데이터셋의 이미지 경로 및 레이블 저장
-from glob import glob
-image_paths = sorted(glob("kfood/*/*/*"))
-image_paths = [image_path for image_path in image_paths if image_path.split("/")[-1].split(".")[-1].lower() in ("png", "jpg", "jpeg")]
-#labels = [class_to_label[Path(image_path).parent.stem] for image_path in image_paths]
-print(len(image_paths))#, len(labels))
+
+def get_image_paths():
+    #데이터셋의 이미지 경로 및 레이블 저장
+    image_paths = sorted(glob("kfood/*/*/*"))
+    image_paths = [image_path for image_path in image_paths if image_path.split("/")[-1].split(".")[-1].lower() in ("png", "jpg", "jpeg")]
+    #labels = [class_to_label[Path(image_path).parent.stem] for image_path in image_paths]
+    n_images = tf.constant(len(image_paths), dtype=tf.int64)
+    print(n_images)#, len(labels))
+    return image_paths
 
 
-def parse_and_crop_image_add_label(tf_filepath):
+
+def parse_and_crop_image(tf_filepath, label):
     
     image = tf.io.read_file(tf_filepath) # 이미지 파일 읽기
     filepath = tf.compat.path_to_str(tf_filepath)
@@ -73,11 +96,12 @@ def parse_and_crop_image_add_label(tf_filepath):
     image_format = tf.strings.lower(tf.strings.split(filepath, ".")[-1])
 
     if image_format == "jpeg":
-        image = tf.image.decode_jpeg(image, channels=3) # JPEG-encoded -> uint8 tensor (RGB format)
+        image = tf.image.decode_jpeg(image) # JPEG-encoded -> uint8 tensor (RGB format)
     elif image_format == "png":
         image = tf.image.decode_png(image, channels=3, dtype=tf.uint8)
-    else:    
+    else:
         image = tf.image.decode_image(image, channels=3, expand_animations=False)
+    
 
 
     #crop
@@ -88,17 +112,8 @@ def parse_and_crop_image_add_label(tf_filepath):
     if tf.reduce_all(tf.not_equal(tf.shape(tf_image_idx), tf.constant((0, 1), dtype=tf.int32))):
         crop_offsets = tf_crop_points[tf.reshape(tf_image_idx, shape=())]
         image = tf.image.crop_to_bounding_box(image, crop_offsets[0], crop_offsets[1], crop_offsets[2], crop_offsets[3])
-    
-    #labeling
-    class_name = tf.strings.split(filepath, "/")[-2]
-    tf_class_name_idx = tf.where(tf_class_to_label == class_name)
-    try:
-        label = tf.reshape(tf_class_name_idx, shape=())
-    except:
-        label = 0
-        print("label error")
 
-    return image, int(label)
+    return image, label
 
 def central_crop(image):
     shape = tf.shape(image)
@@ -112,13 +127,25 @@ def central_crop(image):
 
 def resizing_image(image, label):
     image = central_crop(image)
-    image = tf.image.resize(image, [299, 299], method="nearest")
-    return image, label
+    image = tf.image.resize(image, IMAGE_SIZE, method="nearest")
+    image = tf.cast(image, tf.float32) / 255.
+    return image , label
+
 
 def make_kfood_dataset(filepaths, n_read_threads=5, shuffle_buffer_size=None, n_parse_threads=5, batch_size=32, cache=False):
 
+    labels = [LABELS[CLASSES.index(filepath.split('/')[-2])] for filepath in filepaths]
+
     filenames_dataset = tf.data.Dataset.from_tensor_slices(filepaths)
-    dataset = filenames_dataset.map(parse_and_crop_image_add_label, num_parallel_calls=n_parse_threads)
+    labels = tf.one_hot(labels, n_labels, dtype=tf.uint8)
+    
+    labels_dataset = tf.data.Dataset.from_tensor_slices(labels)
+    
+    
+    dataset = tf.data.Dataset.zip((filenames_dataset, labels_dataset))
+    dataset = dataset.shuffle(150000)
+
+    dataset = dataset.map(parse_and_crop_image, num_parallel_calls=n_parse_threads)
     dataset = dataset.map(resizing_image, num_parallel_calls=n_parse_threads)
     #dataset = filenames_dataset.map(spa)
     if cache:
@@ -130,5 +157,11 @@ def make_kfood_dataset(filepaths, n_read_threads=5, shuffle_buffer_size=None, n_
     return dataset.prefetch(1)
 
 
-#데이터셋 생성
-#dataset = make_kfood_dataset(image_paths, shuffle_buffer_size=10000, n_parse_threads=tf.data.AUTOTUNE)
+def plot_dataset_image_4(dataset):
+    for images, labels in dataset.take(1):
+        plt.figure(figsize=(16,8))
+        plt.axis("off")
+        for i in range(4):
+            plt.subplot(1, 4, i+1)
+            plt.imshow(images[i])
+            print(tf.where(labels[i] == 1))
