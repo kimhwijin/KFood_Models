@@ -25,7 +25,7 @@ def make_class_to_label_file():
             f.write(str(label) + ',' + class_name + '\n')
 
 
-if os.path.exists(DRIVE_PATH / 'class_to_label.txt'):
+if not os.path.exists(DRIVE_PATH / 'class_to_label.txt'):
     make_class_to_label_file()
 
 #class_label 매칭 딕셔너리로 저장
