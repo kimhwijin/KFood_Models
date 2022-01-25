@@ -8,6 +8,7 @@ import matplotlib as mpl
 import csv
 
 keras.backend.clear_session()
+
 REDUCTION_FILTERS = {
     'Inception-v4' : {
         'k' : 192,
