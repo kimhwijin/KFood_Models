@@ -1,3 +1,4 @@
+from curses import echo
 from random import shuffle
 import tensorflow as tf
 import numpy as np
@@ -89,21 +90,13 @@ def get_image_paths(dataset_path='kfood', image_formats=('png', 'jpg', 'jpeg'), 
     image_paths = sorted(glob(dataset_path + "/*/*/*"))
 
     lower_format_image_paths = []
-    print('converting image format to lower...')
-    for image_path in image_paths:
-        
-        image_name, lower_format = image_path.split('.')
-        lower_format = lower_format.lower()
-
-        if lower_format in image_formats:
-            lower_format_image_paths.append("{}.{}".format(image_name, lower_format))
-
-    lower_format_image_paths = np.array(lower_format_image_paths)
+    lower_format_image_paths = [image_path for image_path in image_paths if image_path.split('.')[-1].lower() in image_formats]
     
 
     if shuffle:
         print('shuffling...')
-        np.random.shuffle(lower_format_image_paths)
+        import random
+        random.shuffle(lower_format_image_paths)
 
     print('ready!')
     return lower_format_image_paths
@@ -116,11 +109,14 @@ def parse_and_crop_image(tf_filepath, label):
     filepath = tf.compat.path_to_str(tf_filepath)
     #format decoding
     image_format = tf.strings.split(filepath, ".")[-1]
-
-    if image_format == "png":
+    
+    if image_format == "png" or image_format == "PNG":
         image = tf.image.decode_png(image, channels=3, dtype=tf.uint8)
     else:
-        image = tf.image.decode_jpeg(image, channels=3) # JPEG-encoded -> uint8 tensor (RGB format)
+        try:
+            image = tf.image.decode_jpeg(image, channels=3) # JPEG-encoded -> uint8 tensor (RGB format)
+        except:
+            image = tf.image.decode_image(image, channels=3, expand_animations=True)
 
     #crop
     image_name = tf.strings.split(tf.strings.split(filepath, "/")[-1], ".")[0]
