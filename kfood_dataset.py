@@ -95,14 +95,12 @@ def parse_and_crop_image(tf_filepath, label):
     #format decoding
     image_format = tf.strings.lower(tf.strings.split(filepath, ".")[-1])
 
-    if image_format == "jpeg":
+    if image_format in [b"jpeg", b"jpg"]:
         image = tf.image.decode_jpeg(image) # JPEG-encoded -> uint8 tensor (RGB format)
     elif image_format == "png":
         image = tf.image.decode_png(image, channels=3, dtype=tf.uint8)
     else:
         image = tf.image.decode_image(image, channels=3, expand_animations=False)
-    
-
 
     #crop
     image_name = tf.strings.split(tf.strings.split(filepath, "/")[-1], ".")[0]

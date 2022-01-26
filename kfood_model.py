@@ -416,7 +416,7 @@ class SE_Block(keras.layers.Layer):
 
 
 class XceptionModule(keras.layers.Layer):
-    def __init__(self, filter, **kwrags):
+    def __init__(self, filter, **kwargs):
         super().__init__(**kwargs)
         self.depthwise = keras.layers.Conv2D(filter, kernel_size=3, strides=1, padding='same')
         self.pointwise = keras.layers.Conv2D(filter, kernel_size=1, strides=1, padding="same")
