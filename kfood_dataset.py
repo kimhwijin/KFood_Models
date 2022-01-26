@@ -77,14 +77,23 @@ tf_crop_image_names = tf.constant(list(crop_points.keys()), dtype=tf.string)
 tf_crop_points = tf.constant(list(crop_points.values()))
 
 
-def get_image_paths(dataset_path='kfood', image_format=('png', 'jpg', 'jpeg'), shuffle=True):
+def get_image_paths(dataset_path='kfood', image_formats=('png', 'jpg', 'jpeg'), shuffle=True):
     #데이터셋의 이미지 경로 및 레이블 저장
     image_paths = sorted(glob(dataset_path + "/*/*/*"))
-    image_paths = [image_path for image_path in image_paths if image_path.split("/")[-1].split(".")[-1].lower() in image_format]
-    np.random.shuffle(np.array(image_paths))
-    #n_images = tf.constant(len(image_paths), dtype=tf.int64)
-    print(len(image_paths))#, len(labels))
-    return image_paths
+
+    lower_format_image_paths = []
+    for image_path in image_paths:
+        
+        image_name, lower_format = image_path.split('.')
+        lower_format = lower_format.lower()
+
+        if lower_format in image_formats:
+            lower_format_image_paths.append("{}.{}".format(image_name, lower_format))
+
+    lower_format_image_paths = np.array(lower_format_image_paths)
+    np.random.shuffle(lower_format_image_paths)
+
+    return lower_format_image_paths
 
 
 
@@ -95,7 +104,7 @@ def parse_and_crop_image(tf_filepath, label):
     #format decoding
     image_format = tf.strings.lower(tf.strings.split(filepath, ".")[-1])
 
-    if image_format in [b"jpeg", b"jpg"]:
+    if image_format == "jpeg" or image_format == "jpg":
         image = tf.image.decode_jpeg(image) # JPEG-encoded -> uint8 tensor (RGB format)
     elif image_format == "png":
         image = tf.image.decode_png(image, channels=3, dtype=tf.uint8)
