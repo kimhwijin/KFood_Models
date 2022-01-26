@@ -81,7 +81,7 @@ def get_image_paths(dataset_path='kfood', image_format=('png', 'jpg', 'jpeg'), s
     #데이터셋의 이미지 경로 및 레이블 저장
     image_paths = sorted(glob(dataset_path + "/*/*/*"))
     image_paths = [image_path for image_path in image_paths if image_path.split("/")[-1].split(".")[-1].lower() in image_format]
-    image_paths = np.random.shuffle(np.array(image_paths))
+    np.random.shuffle(np.array(image_paths))
     #n_images = tf.constant(len(image_paths), dtype=tf.int64)
     print(len(image_paths))#, len(labels))
     return image_paths
