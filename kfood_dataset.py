@@ -26,8 +26,11 @@ def make_class_to_label_file():
 
 
 if not os.path.exists(DRIVE_PATH / 'class_to_label.txt'):
+    print('making class to label txt file...')
     make_class_to_label_file()
 
+
+print('saving classes, labels...')
 #class_label 매칭 딕셔너리로 저장
 LABELS = []
 CLASSES = []
@@ -66,6 +69,8 @@ def get_image_crop_points(filepath):
             
     return crops
 
+
+print('saving crop information...')
 #crop 지점 정보 빼오기
 crop_points = {}
 class_list = list(filepath.glob("*/*"))
@@ -76,12 +81,15 @@ for class_name in class_list:
 tf_crop_image_names = tf.constant(list(crop_points.keys()), dtype=tf.string)
 tf_crop_points = tf.constant(list(crop_points.values()))
 
+print('ready!')
 
 def get_image_paths(dataset_path='kfood', image_formats=('png', 'jpg', 'jpeg'), shuffle=True):
+    print('finding image paths...')
     #데이터셋의 이미지 경로 및 레이블 저장
     image_paths = sorted(glob(dataset_path + "/*/*/*"))
 
     lower_format_image_paths = []
+    print('converting image format to lower...')
     for image_path in image_paths:
         
         image_name, lower_format = image_path.split('.')
@@ -91,8 +99,13 @@ def get_image_paths(dataset_path='kfood', image_formats=('png', 'jpg', 'jpeg'), 
             lower_format_image_paths.append("{}.{}".format(image_name, lower_format))
 
     lower_format_image_paths = np.array(lower_format_image_paths)
-    np.random.shuffle(lower_format_image_paths)
+    
 
+    if shuffle:
+        print('shuffling...')
+        np.random.shuffle(lower_format_image_paths)
+
+    print('ready!')
     return lower_format_image_paths
 
 
@@ -103,11 +116,11 @@ def parse_and_crop_image(tf_filepath, label):
     filepath = tf.compat.path_to_str(tf_filepath)
     #format decoding
     image_format = tf.strings.split(filepath, ".")[-1]
-    
+
     if image_format == "png":
         image = tf.image.decode_png(image, channels=3, dtype=tf.uint8)
     else:
-        image = tf.image.decode_jpeg(image) # JPEG-encoded -> uint8 tensor (RGB format)
+        image = tf.image.decode_jpeg(image, channels=3) # JPEG-encoded -> uint8 tensor (RGB format)
 
     #crop
     image_name = tf.strings.split(tf.strings.split(filepath, "/")[-1], ".")[0]
@@ -139,13 +152,11 @@ def resizing_image(image, label):
 
 def make_kfood_dataset(filepaths, n_read_threads=5, shuffle_buffer_size=None, n_parse_threads=5, batch_size=32, cache=False):
 
-    labels = [LABELS[CLASSES.index(filepath.split('/')[-2])] for filepath in filepaths]
-
     filenames_dataset = tf.data.Dataset.from_tensor_slices(filepaths)
+
+    labels = [LABELS[CLASSES.index(filepath.split('/')[-2])] for filepath in filepaths]
     labels = tf.one_hot(labels, n_labels, dtype=tf.uint8)
-    
     labels_dataset = tf.data.Dataset.from_tensor_slices(labels)
-    
     
     dataset = tf.data.Dataset.zip((filenames_dataset, labels_dataset))
     dataset = dataset.shuffle(150000)
