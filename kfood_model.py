@@ -298,3 +298,43 @@ class InceptionC(keras.layers.Layer):
         Z_4_2 = self.conv4_4_2(Z_4)
 
         return self.concat([Z_1, Z_2, Z_3_1, Z_3_2, Z_4_1, Z_4_2])
+
+
+def make_inception():
+    inputs = keras.layers.Input(shape=[299, 299, 3])
+    stem_module = Stem()
+    Z = stem_module(inputs)
+
+    #4 x inception A
+    inceptionA_modules = []
+    for _ in range(4):
+        inceptionA_modules.append(InceptionA())
+    for inceptionA_module in inceptionA_modules:
+        Z = inceptionA_module(Z)
+
+    reductionA = ReductionA(REDUCTION_FILTERS[WEIGHTS_TYPE])
+    Z = reductionA(Z)
+
+    #7 x inceptioin B
+    inceptionB_modules = []
+    for _ in range(4):
+        inceptionB_modules.append(InceptionB())
+    for inceptionB_module in inceptionB_modules:
+        Z = inceptionB_module(Z)
+
+    reductionB = ReductionB()
+    Z = reductionB(Z)
+
+    #3 x inception C
+    inceptionC_modules = []
+    for _ in range(3):
+        inceptionC_modules.append(InceptionC())
+    for inceptionC_module in inceptionC_modules:
+        Z = inceptionC_module(Z)
+
+    Z = keras.layers.GlobalAveragePooling2D()(Z)
+    Z = keras.layers.Dropout(0.8)(Z)
+    outputs = keras.layers.Dense(150, activation='softmax')(Z)
+
+    model = keras.models.Model(inputs=inputs, outputs=outputs)
+    return model

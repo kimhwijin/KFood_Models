@@ -77,13 +77,13 @@ tf_crop_image_names = tf.constant(list(crop_points.keys()), dtype=tf.string)
 tf_crop_points = tf.constant(list(crop_points.values()))
 
 
-def get_image_paths():
+def get_image_paths(dataset_path='kfood', image_format=('png', 'jpg', 'jpeg'), shuffle=True):
     #데이터셋의 이미지 경로 및 레이블 저장
-    image_paths = sorted(glob("kfood/*/*/*"))
-    image_paths = [image_path for image_path in image_paths if image_path.split("/")[-1].split(".")[-1].lower() in ("png", "jpg", "jpeg")]
-    #labels = [class_to_label[Path(image_path).parent.stem] for image_path in image_paths]
-    n_images = tf.constant(len(image_paths), dtype=tf.int64)
-    print(n_images)#, len(labels))
+    image_paths = sorted(glob(dataset_path + "/*/*/*"))
+    image_paths = [image_path for image_path in image_paths if image_path.split("/")[-1].split(".")[-1].lower() in image_format]
+    image_paths = np.random.shuffle(np.array(image_paths))
+    #n_images = tf.constant(len(image_paths), dtype=tf.int64)
+    print(len(image_paths))#, len(labels))
     return image_paths
 
 
