@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import csv
 
+from torch import conv1d
+
 keras.backend.clear_session()
 
 REDUCTION_FILTERS = {
@@ -135,9 +137,7 @@ class ReductionA(keras.layers.Layer):
     def call(self, inputs):
         
         Z = inputs
-
         Z_1 = self.max_pool1(Z)
-
         Z_2 = self.conv2(Z)
 
         Z_3 = self.conv3_1(Z)
@@ -299,46 +299,6 @@ class InceptionC(keras.layers.Layer):
 
         return self.concat([Z_1, Z_2, Z_3_1, Z_3_2, Z_4_1, Z_4_2])
 
-def make_inceptionV4(input_shape=[299, 299, 3], output_dim=150):
-    inputs = keras.layers.Input(shape=input_shape)
-    stem_module = Stem()
-    Z = stem_module(inputs)
-
-    #4 x inception A
-    inceptionA_modules = []
-    for _ in range(4):
-        inceptionA_modules.append(InceptionA())
-    for inceptionA_module in inceptionA_modules:
-        Z = inceptionA_module(Z)
-
-    reductionA = ReductionA(REDUCTION_FILTERS[WEIGHTS_TYPE])
-    Z = reductionA(Z)
-
-    #7 x inceptioin B
-    inceptionB_modules = []
-    for _ in range(7):
-        inceptionB_modules.append(InceptionB())
-    for inceptionB_module in inceptionB_modules:
-        Z = inceptionB_module(Z)
-
-    reductionB = ReductionB()
-    Z = reductionB(Z)
-
-    #3 x inception C
-    inceptionC_modules = []
-    for _ in range(3):
-        inceptionC_modules.append(InceptionC())
-    for inceptionC_module in inceptionC_modules:
-        Z = inceptionC_module(Z)
-
-    Z = keras.layers.GlobalAveragePooling2D()(Z)
-    Z = keras.layers.Dropout(0.8)(Z)
-    outputs = keras.layers.Dense(output_dim, activation='softmax')(Z)
-
-    model = keras.models.Model(inputs=inputs, outputs=outputs)
-
-    return model
-
 
 
 
@@ -377,7 +337,7 @@ class ResNetUnit(keras.layers.Layer):
         super().__init__(**kwargs)
         self.activation = keras.activations.get(activation)
         self.main_layers = [
-            keras.layers.Conv2D(filters, 3, strides=strides, padding="samen", use_bias=False),
+            keras.layers.Conv2D(filters, 3, strides=strides, padding="same", use_bias=False),
             keras.layers.BatchNormalization(),
             self.activation,
             keras.layers.Conv2D(filters, 3, strides=1, padding="same", use_bias=False),
@@ -428,3 +388,171 @@ class XceptionModule(keras.layers.Layer):
         Z = self.pointwise(Z)
         return keras.layers.BatchNormalization()(Z)
 
+class InceptionResNetA(keras.layers.Layer):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.conv1 = conv2d_bn(32, '1x1', 's', 1)
+
+        self.conv2_1 = conv2d_bn(32, '1x1', 's', 1)
+        self.conv2_2 = conv2d_bn(32, '3x3', 's', 1)
+        
+        self.conv3_1 = conv2d_bn(32, '1x1', 's', 1)
+        self.conv3_2 = conv2d_bn(48, '3x3', 's', 1)
+        self.conv3_3 = conv2d_bn(64, '3x3', 's', 1)
+
+        self.conv4 = keras.layers.Conv2D(384, kernel_size=1, strides=1, padding='same')
+        
+        self.concat = keras.layers.Concatenate(axis=-1)
+
+        self.skip = keras.layers.Conv2D(384, kernel_size=1, strides=1, padding='same')
+        
+        self.bn = keras.layers.BatchNormalization()
+        self.act = keras.layers.Actication('relu')
+
+    def call(self, inputs):
+        Z = inputs
+        
+        Z_1 = self.conv1(Z)
+        
+        Z_2 = self.conv2_1(Z)
+        Z_2 = self.conv2_2(Z_2)
+
+        Z_3 = self.conv3_1(Z)
+        Z_3 = self.conv3_2(Z_3)
+        Z_3 = self.conv3_3(Z_3)
+
+        Z_4 = self.concat([Z_1, Z_2, Z_3])
+        
+        Z_4 = self.conv4(Z_4)
+
+        Z_skip = self.skip(Z)
+
+        Z = self.bn(Z_4 + Z_skip)
+        Z = self.act(Z)
+
+        return Z
+
+class InceptionResNetB(keras.layers.Layer):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.conv1 = conv2d_bn(192, '1x1', 's', 1)
+
+        self.conv2_1 = conv2d_bn(128, '1x1', 's', 1)
+        self.conv2_2 = conv2d_bn(160, '1x7', 's', 1)
+        self.conv2_3 = conv2d_bn(192, '7x1', 's', 1)
+
+        self.conv4 = keras.layers.Conv2D(1154, kernel_size=1, strides=1, padding='same')
+        
+        self.concat = keras.layers.Concatenate(axis=-1)
+
+        self.skip = keras.layers.Conv2D(1154, kernel_size=1, strides=1, padding='same')
+        
+        self.bn = keras.layers.BatchNormalization()
+        self.act = keras.layers.Actication('relu')
+
+    def call(self, inputs):
+        Z = inputs
+        
+        Z_1 = self.conv1(Z)
+        
+        Z_2 = self.conv2_1(Z)
+        Z_2 = self.conv2_2(Z_2)
+        Z_2 = self.conv2_3(Z_2)
+
+        Z_3 = self.concat([Z_1, Z_2])
+        
+        Z_3 = self.conv4(Z_3)
+
+        Z_skip = self.skip(Z)
+
+        Z = self.bn(Z_3 + Z_skip)
+        Z = self.act(Z)
+
+        return Z
+
+    
+class InceptionResNetB(keras.layers.Layer):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.conv1 = conv2d_bn(192, '1x1', 's', 1)
+
+        self.conv2_1 = conv2d_bn(192, '1x1', 's', 1)
+        self.conv2_2 = conv2d_bn(224, '1x7', 's', 1)
+        self.conv2_3 = conv2d_bn(256, '7x1', 's', 1)
+
+        self.conv4 = keras.layers.Conv2D(2048, kernel_size=1, strides=1, padding='same')
+        
+        self.concat = keras.layers.Concatenate(axis=-1)
+
+        self.skip = keras.layers.Conv2D(2048, kernel_size=1, strides=1, padding='same')
+        
+        self.bn = keras.layers.BatchNormalization()
+        self.act = keras.layers.Actication('relu')
+
+    def call(self, inputs):
+        Z = inputs
+        
+        Z_1 = self.conv1(Z)
+        
+        Z_2 = self.conv2_1(Z)
+        Z_2 = self.conv2_2(Z_2)
+        Z_2 = self.conv2_3(Z_2)
+
+        Z_3 = self.concat([Z_1, Z_2])
+        
+        Z_3 = self.conv4(Z_3)
+
+        Z_skip = self.skip(Z)
+
+        Z = self.bn(Z_3 + Z_skip)
+        Z = self.act(Z)
+
+        return Z
+
+
+
+
+
+
+
+
+def make_inceptionV4(input_shape=[299, 299, 3], output_dim=150):
+    inputs = keras.layers.Input(shape=input_shape)
+    stem_module = Stem()
+    Z = stem_module(inputs)
+
+    #4 x inception A
+    inceptionA_modules = []
+    for _ in range(4):
+        inceptionA_modules.append(InceptionA())
+    for inceptionA_module in inceptionA_modules:
+        Z = inceptionA_module(Z)
+
+    reductionA = ReductionA(REDUCTION_FILTERS[WEIGHTS_TYPE])
+    Z = reductionA(Z)
+
+    #7 x inceptioin B
+    inceptionB_modules = []
+    for _ in range(7):
+        inceptionB_modules.append(InceptionB())
+    for inceptionB_module in inceptionB_modules:
+        Z = inceptionB_module(Z)
+
+    reductionB = ReductionB()
+    Z = reductionB(Z)
+
+    #3 x inception C
+    inceptionC_modules = []
+    for _ in range(3):
+        inceptionC_modules.append(InceptionC())
+    for inceptionC_module in inceptionC_modules:
+        Z = inceptionC_module(Z)
+
+    Z = keras.layers.GlobalAveragePooling2D()(Z)
+    Z = keras.layers.Dropout(0.8)(Z)
+    outputs = keras.layers.Dense(output_dim, activation='softmax')(Z)
+
+    model = keras.models.Model(inputs=inputs, outputs=outputs)
+
+    return model    
