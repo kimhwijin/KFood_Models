@@ -7,6 +7,8 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from glob import glob
 
+from torch import exp2
+
 IMAGE_SIZE = (299, 299)
 BATCH_SIZE = 32
 
@@ -98,7 +100,7 @@ def get_image_paths(dataset_path='kfood', image_formats=('png', 'jpg', 'jpeg'), 
         import random
         random.shuffle(lower_format_image_paths)
 
-    print('ready!')
+    print('paths ready!')
     return lower_format_image_paths
 
 
@@ -160,7 +162,7 @@ def make_kfood_dataset(filepaths, n_read_threads=5, shuffle_buffer_size=None, n_
     dataset = dataset.map(resizing_image, num_parallel_calls=n_parse_threads)
     #dataset = filenames_dataset.map(spa)
     dataset = dataset.repeat()
-    
+
     if cache:
         dataset = dataset.cache()
     if shuffle_buffer_size:
@@ -178,3 +180,14 @@ def plot_dataset_image_4(dataset):
             plt.subplot(1, 4, i+1)
             plt.imshow(images[i])
             print(tf.where(labels[i] == 1))
+
+def dataset_valid_check(paths):
+    from tqdm import tqdm
+    excepted_images = []
+    for i, path in tqdm(enumerate(paths)):
+        try:
+            byte_image = tf.io.read_file(path)
+            image = tf.image.decode_image(byte_image, channels=3, expand_animations=False)
+        except:
+            excepted_images.append(i)
+    return excepted_images
