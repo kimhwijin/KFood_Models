@@ -1,3 +1,5 @@
+from tkinter import W
+from matplotlib.backend_bases import MouseEvent
 import tensorflow as tf
 import numpy as np
 from tensorflow import keras
@@ -169,6 +171,7 @@ class Stem(keras.layers.Layer):
         #conv 96 3x3 s + conv 96 3x3 s
         #conv 192 3x3 v / max pool 2 v
         
+
         #299x299x3
         self.conv1 = conv2d_bn(filters['conv1'], '3x3', 'v', 2) #149x149x3
         self.conv2 = conv2d_bn(filters['conv2'], '3x3', 'v', 1) #147x147x3
@@ -246,20 +249,20 @@ class ReductionA(keras.layers.Layer):
         return self.concat([Z_1, Z_2, Z_3])
 
 class InceptionA(keras.layers.Layer):
-    def __init__(self, **kwargs):
+    def __init__(self, filters, **kwargs):
         super().__init__(**kwargs)
         
         self.avg_pool_1_1 = avg_pool2d('2x2', 's', 1)
-        self.conv1_2 = conv2d_bn(96, '1x1', 's', 1)
+        self.conv1_2 = conv2d_bn(filters['conv1_2'], '1x1', 's', 1)
         
-        self.conv2 = conv2d_bn(96, '1x1', 's', 1)
+        self.conv2 = conv2d_bn(filters['conv2'], '1x1', 's', 1)
         
-        self.conv3_1 = conv2d_bn(64, '1x1', 's', 1)
-        self.conv3_2 = conv2d_bn(96, '3x3', 's', 1)
+        self.conv3_1 = conv2d_bn(filters['conv3_1'], '1x1', 's', 1)
+        self.conv3_2 = conv2d_bn(filters['conv3_2'], '3x3', 's', 1)
 
-        self.conv4_1 = conv2d_bn(64, '1x1', 's', 1)
-        self.conv4_2 = conv2d_bn(96, '3x3', 's', 1)
-        self.conv4_3 = conv2d_bn(96, '3x3', 's', 1)
+        self.conv4_1 = conv2d_bn(filters['conv4_1'], '1x1', 's', 1)
+        self.conv4_2 = conv2d_bn(filters['conv4_2'], '3x3', 's', 1)
+        self.conv4_3 = conv2d_bn(filters['conv4_3'], '3x3', 's', 1)
 
         self.concat = keras.layers.Concatenate(axis=-1)
     
@@ -282,23 +285,23 @@ class InceptionA(keras.layers.Layer):
         return keras.layers.Concatenate(axis=-1)([Z_1, Z_2, Z_3, Z_4])
 
 class InceptionB(keras.layers.Layer):
-    def __init__(self, **kwargs):
+    def __init__(self, filters,  **kwargs):
         super().__init__(**kwargs)
 
         self.avg_pool_1_1 = avg_pool2d('2x2', 's', 1)
-        self.conv1_2 = conv2d_bn(128, '1x1', 's', 1)
+        self.conv1_2 = conv2d_bn(filters['conv1_2'], '1x1', 's', 1)
 
-        self.conv2 = conv2d_bn(384, '1x1', 's', 1)
+        self.conv2 = conv2d_bn(filters['conv2'], '1x1', 's', 1)
 
-        self.conv3_1 = conv2d_bn(192, '1x1', 's', 1)
-        self.conv3_2 = conv2d_bn(224, '7x1', 's', 1)
-        self.conv3_3 = conv2d_bn(256, '1x7', 's', 1)
+        self.conv3_1 = conv2d_bn(filters['conv3_1'], '1x1', 's', 1)
+        self.conv3_2 = conv2d_bn(filters['conv3_2'], '7x1', 's', 1)
+        self.conv3_3 = conv2d_bn(filters['conv3_3'], '1x7', 's', 1)
         
-        self.conv4_1 = conv2d_bn(192, '1x1', 's', 1)
-        self.conv4_2 = conv2d_bn(192, '1x7', 's', 1)
-        self.conv4_3 = conv2d_bn(224, '7x1', 's', 1)
-        self.conv4_4 = conv2d_bn(224, '1x7', 's', 1)
-        self.conv4_5 = conv2d_bn(256, '7x1', 's', 1)
+        self.conv4_1 = conv2d_bn(filters['conv4_1'], '1x1', 's', 1)
+        self.conv4_2 = conv2d_bn(filters['conv4_2'], '1x7', 's', 1)
+        self.conv4_3 = conv2d_bn(filters['conv4_3'], '7x1', 's', 1)
+        self.conv4_4 = conv2d_bn(filters['conv4_4'], '1x7', 's', 1)
+        self.conv4_5 = conv2d_bn(filters['conv4_5'], '7x1', 's', 1)
 
         self.concat = keras.layers.Concatenate(axis=-1)
     
@@ -324,18 +327,18 @@ class InceptionB(keras.layers.Layer):
         return self.concat([Z_1, Z_2, Z_3, Z_3])
 
 class ReductionB(keras.layers.Layer):
-    def __init__(self, **kwargs):
+    def __init__(self, filters, **kwargs):
         super().__init__(**kwargs)
 
         self.max_pool1 = max_pool2d('3x3', 'v', 2)
 
-        self.conv2_1 = conv2d_bn(192, '1x1', 's', 1)
-        self.conv2_2 = conv2d_bn(192, '3x3', 'v', 2)
+        self.conv2_1 = conv2d_bn(filters['conv2_1'], '1x1', 's', 1)
+        self.conv2_2 = conv2d_bn(filters['conv2_2'], '3x3', 'v', 2)
 
-        self.conv3_1 = conv2d_bn(256, '1x1', 's', 1)
-        self.conv3_2 = conv2d_bn(256, '1x7', 's', 1)
-        self.conv3_3 = conv2d_bn(320, '7x1', 's', 1)
-        self.conv3_4 = conv2d_bn(320, '3x3', 'v', 2)
+        self.conv3_1 = conv2d_bn(filters['conv3_1'], '1x1', 's', 1)
+        self.conv3_2 = conv2d_bn(filters['conv3_2'], '1x7', 's', 1)
+        self.conv3_3 = conv2d_bn(filters['conv3_3'], '7x1', 's', 1)
+        self.conv3_4 = conv2d_bn(filters['conv3_4'], '3x3', 'v', 2)
 
         self.concat = keras.layers.Concatenate(axis=-1)
     
@@ -356,23 +359,23 @@ class ReductionB(keras.layers.Layer):
         return self.concat([Z_1, Z_2, Z_3])
 
 class InceptionC(keras.layers.Layer):
-    def __init__(self, **kwargs):
+    def __init__(self, filters, **kwargs):
         super().__init__(**kwargs)
 
         self.arg_pool1_1 = avg_pool2d('2x2', 's', 1)
-        self.conv1_2 = conv2d_bn(256, '1x1', 's', 1)
+        self.conv1_2 = conv2d_bn(filters['conv1_2'], '1x1', 's', 1)
 
-        self.conv2 = conv2d_bn(256, '1x1', 's', 1)
+        self.conv2 = conv2d_bn(filters['conv2'], '1x1', 's', 1)
         
-        self.conv3_1 = conv2d_bn(384, '1x1', 's', 1)
-        self.conv3_2_1 = conv2d_bn(256, '1x3', 's', 1)
-        self.conv3_2_2 = conv2d_bn(256, '3x1', 's', 1)
+        self.conv3_1 = conv2d_bn(filters['conv3_1'], '1x1', 's', 1)
+        self.conv3_2_1 = conv2d_bn(filters['conv3_2'], '1x3', 's', 1)
+        self.conv3_2_2 = conv2d_bn(filters['conv3_3'], '3x1', 's', 1)
 
-        self.conv4_1 = conv2d_bn(384, '1x1', 's', 1)
-        self.conv4_2 = conv2d_bn(448, '1x3', 's', 1)
-        self.conv4_3 = conv2d_bn(512, '3x1', 's', 1)
-        self.conv4_4_1 = conv2d_bn(256, '3x1', 's', 1)
-        self.conv4_4_2 = conv2d_bn(256, '1x3', 's', 1)
+        self.conv4_1 = conv2d_bn(filters['conv4_1'], '1x1', 's', 1)
+        self.conv4_2 = conv2d_bn(filters['conv4_2'], '1x3', 's', 1)
+        self.conv4_3 = conv2d_bn(filters['conv4_3'], '3x1', 's', 1)
+        self.conv4_4_1 = conv2d_bn(filters['conv4_4_1'], '3x1', 's', 1)
+        self.conv4_4_2 = conv2d_bn(filters['conv4_4_2'], '1x3', 's', 1)
 
         self.concat = keras.layers.Concatenate(axis=-1)
     
@@ -395,7 +398,6 @@ class InceptionC(keras.layers.Layer):
         Z_4_2 = self.conv4_4_2(Z_4)
 
         return self.concat([Z_1, Z_2, Z_3_1, Z_3_2, Z_4_1, Z_4_2])
-
 
 
 
@@ -487,22 +489,22 @@ class XceptionModule(keras.layers.Layer):
 
 
 class InceptionResNetA(keras.layers.Layer):
-    def __init__(self, **kwargs):
+    def __init__(self, filters ,**kwargs):
         super().__init__(**kwargs)
-        self.conv1 = conv2d_bn(32, '1x1', 's', 1)
+        self.conv1 = conv2d_bn(filters['conv1'], '1x1', 's', 1)
 
-        self.conv2_1 = conv2d_bn(32, '1x1', 's', 1)
-        self.conv2_2 = conv2d_bn(32, '3x3', 's', 1)
+        self.conv2_1 = conv2d_bn(filters['conv2_1'], '1x1', 's', 1)
+        self.conv2_2 = conv2d_bn(filters['conv2_2'], '3x3', 's', 1)
         
-        self.conv3_1 = conv2d_bn(32, '1x1', 's', 1)
-        self.conv3_2 = conv2d_bn(48, '3x3', 's', 1)
-        self.conv3_3 = conv2d_bn(64, '3x3', 's', 1)
+        self.conv3_1 = conv2d_bn(filters['conv3_1'], '1x1', 's', 1)
+        self.conv3_2 = conv2d_bn(filters['conv3_2'], '3x3', 's', 1)
+        self.conv3_3 = conv2d_bn(filters['conv3_3'], '3x3', 's', 1)
 
-        self.conv4 = keras.layers.Conv2D(384, kernel_size=1, strides=1, padding='same')
+        self.conv4 = keras.layers.Conv2D(filters['conv4'], kernel_size=1, strides=1, padding='same')
         
         self.concat = keras.layers.Concatenate(axis=-1)
 
-        self.skip = keras.layers.Conv2D(384, kernel_size=1, strides=1, padding='same')
+        self.skip = keras.layers.Conv2D(filters['conv4'], kernel_size=1, strides=1, padding='same')
         
         self.bn = keras.layers.BatchNormalization()
         self.act = keras.layers.Activation('relu')
@@ -531,19 +533,19 @@ class InceptionResNetA(keras.layers.Layer):
         return Z
 
 class InceptionResNetB(keras.layers.Layer):
-    def __init__(self, **kwargs):
+    def __init__(self, filters, **kwargs):
         super().__init__(**kwargs)
-        self.conv1 = conv2d_bn(192, '1x1', 's', 1)
+        self.conv1 = conv2d_bn(filters['conv1'], '1x1', 's', 1)
 
-        self.conv2_1 = conv2d_bn(128, '1x1', 's', 1)
-        self.conv2_2 = conv2d_bn(160, '1x7', 's', 1)
-        self.conv2_3 = conv2d_bn(192, '7x1', 's', 1)
+        self.conv2_1 = conv2d_bn(filters['conv2_1'], '1x1', 's', 1)
+        self.conv2_2 = conv2d_bn(filters['conv2_2'], '1x7', 's', 1)
+        self.conv2_3 = conv2d_bn(filters['conv2_3'], '7x1', 's', 1)
 
-        self.conv4 = keras.layers.Conv2D(1154, kernel_size=1, strides=1, padding='same')
+        self.conv4 = keras.layers.Conv2D(filters['conv4'], kernel_size=1, strides=1, padding='same')
         
         self.concat = keras.layers.Concatenate(axis=-1)
 
-        self.skip = keras.layers.Conv2D(1154, kernel_size=1, strides=1, padding='same')
+        self.skip = keras.layers.Conv2D(filters['conv4'], kernel_size=1, strides=1, padding='same')
         
         self.bn = keras.layers.BatchNormalization()
         self.act = keras.layers.Activation('relu')
@@ -569,20 +571,20 @@ class InceptionResNetB(keras.layers.Layer):
         return Z
 
 class InceptionResNetC(keras.layers.Layer):
-    def __init__(self, **kwargs):
+    def __init__(self, filters, **kwargs):
         super().__init__(**kwargs)
 
-        self.conv1 = conv2d_bn(192, '1x1', 's', 1)
+        self.conv1 = conv2d_bn(filters['conv1'], '1x1', 's', 1)
 
-        self.conv2_1 = conv2d_bn(192, '1x1', 's', 1)
-        self.conv2_2 = conv2d_bn(224, '1x7', 's', 1)
-        self.conv2_3 = conv2d_bn(256, '7x1', 's', 1)
+        self.conv2_1 = conv2d_bn(filters['conv2_1'], '1x1', 's', 1)
+        self.conv2_2 = conv2d_bn(filters['conv2_2'], '1x7', 's', 1)
+        self.conv2_3 = conv2d_bn(filters['conv2_3'], '7x1', 's', 1)
 
-        self.conv4 = keras.layers.Conv2D(2048, kernel_size=1, strides=1, padding='same')
+        self.conv4 = keras.layers.Conv2D(filters['conv4'], kernel_size=1, strides=1, padding='same')
         
         self.concat = keras.layers.Concatenate(axis=-1)
 
-        self.skip = keras.layers.Conv2D(2048, kernel_size=1, strides=1, padding='same')
+        self.skip = keras.layers.Conv2D(filters['conv4'], kernel_size=1, strides=1, padding='same')
         
         self.bn = keras.layers.BatchNormalization()
         self.act = keras.layers.Activation('relu')
@@ -608,20 +610,20 @@ class InceptionResNetC(keras.layers.Layer):
         return Z
 
 class ReductionResNetB(keras.layers.Layer):
-    def __init__(self, **kwargs):
+    def __init__(self, filters, **kwargs):
         super().__init__(**kwargs)
 
         self.max_pool1 = max_pool2d('3x3', 'v', 2)
 
-        self.conv2_1 = conv2d_bn(256, '1x1', 's', 1)
-        self.conv2_2 = conv2d_bn(384, '3x3', 'v', 2)
+        self.conv2_1 = conv2d_bn(filters['conv2_1'], '1x1', 's', 1)
+        self.conv2_2 = conv2d_bn(filters['conv2_2'], '3x3', 'v', 2)
 
-        self.conv3_1 = conv2d_bn(256, '1x1', 's', 1)
-        self.conv3_2 = conv2d_bn(288, '3x3', 'v', 2)
+        self.conv3_1 = conv2d_bn(filters['conv3_1'], '1x1', 's', 1)
+        self.conv3_2 = conv2d_bn(filters['conv3_2'], '3x3', 'v', 2)
 
-        self.conv4_1 = conv2d_bn(256, '1x1', 's', 1)
-        self.conv4_2 = conv2d_bn(288, '3x3', 's', 1)
-        self.conv4_3 = conv2d_bn(320, '3x3', 'v', 2)
+        self.conv4_1 = conv2d_bn(filters['conv4_1'], '1x1', 's', 1)
+        self.conv4_2 = conv2d_bn(filters['conv4_2'], '3x3', 's', 1)
+        self.conv4_3 = conv2d_bn(filters['conv4_3'], '3x3', 'v', 2)
 
         self.concat = keras.layers.Concatenate(axis=-1)
     
@@ -648,36 +650,36 @@ class ReductionResNetB(keras.layers.Layer):
 
 def make_InceptionV4(input_shape=[299, 299, 3], output_dim=150):
     
-    model_name = 'Inception-V4'
+    WEIGHTS_TYPE = 'Inception-V4'
 
     inputs = keras.layers.Input(shape=input_shape)
-    stem_module = Stem()
+    stem_module = Stem(STEM_FILTERS)
     Z = stem_module(inputs)
 
     #4 x inception A
     inceptionA_modules = []
     for _ in range(4):
-        inceptionA_modules.append(InceptionA())
+        inceptionA_modules.append(InceptionA(INCEPTION_FILTERS[WEIGHTS_TYPE]['A']))
     for inceptionA_module in inceptionA_modules:
         Z = inceptionA_module(Z)
 
-    reductionA = ReductionA(REDUCTION_FILTERS[model_name])
+    reductionA = ReductionA(REDUCTION_FILTERS[WEIGHTS_TYPE]['A'])
     Z = reductionA(Z)
 
     #7 x inceptioin B
     inceptionB_modules = []
     for _ in range(7):
-        inceptionB_modules.append(InceptionB())
+        inceptionB_modules.append(InceptionB(INCEPTION_FILTERS[WEIGHTS_TYPE]['A']))
     for inceptionB_module in inceptionB_modules:
         Z = inceptionB_module(Z)
 
-    reductionB = ReductionB()
+    reductionB = ReductionB(REDUCTION_FILTERS[WEIGHTS_TYPE]['B'])
     Z = reductionB(Z)
 
     #3 x inception C
     inceptionC_modules = []
     for _ in range(3):
-        inceptionC_modules.append(InceptionC())
+        inceptionC_modules.append(InceptionC(INCEPTION_FILTERS[WEIGHTS_TYPE]['C']))
     for inceptionC_module in inceptionC_modules:
         Z = inceptionC_module(Z)
 
@@ -690,35 +692,38 @@ def make_InceptionV4(input_shape=[299, 299, 3], output_dim=150):
     return model    
 
 
-def make_InceptionResNetV2(input_shape=[299, 299, 3], output_dim=150, weights_type='Inception-ResNet-V2'):
+def make_InceptionResNetV2(input_shape=[299, 299, 3], output_dim=150):
+    
+    WEIGHTS_TYPE = 'Inception-ResNet-V2'
+
     inputs = keras.layers.Input(shape=input_shape)
-    stem_module = Stem()
+    stem_module = Stem(STEM_FILTERS)
     Z = stem_module(inputs)
 
     #4 x inception A
     inceptionA_modules = []
     for _ in range(5):
-        inceptionA_modules.append(InceptionResNetA())
+        inceptionA_modules.append(InceptionResNetA(INCEPTION_FILTERS[WEIGHTS_TYPE]['A']))
     for inceptionA_module in inceptionA_modules:
         Z = inceptionA_module(Z)
 
-    reductionA = ReductionA(REDUCTION_FILTERS[weights_type])
+    reductionA = ReductionA(REDUCTION_FILTERS[WEIGHTS_TYPE]['A'])
     Z = reductionA(Z)
 
     #7 x inceptioin B
     inceptionB_modules = []
     for _ in range(10):
-        inceptionB_modules.append(InceptionResNetB())
+        inceptionB_modules.append(InceptionResNetB(INCEPTION_FILTERS[WEIGHTS_TYPE]['B']))
     for inceptionB_module in inceptionB_modules:
         Z = inceptionB_module(Z)
 
-    reductionB = ReductionResNetB()
+    reductionB = ReductionResNetB(REDUCTION_FILTERS[WEIGHTS_TYPE]['B'])
     Z = reductionB(Z)
 
     #3 x inception C
     inceptionC_modules = []
     for _ in range(5):
-        inceptionC_modules.append(InceptionResNetC())
+        inceptionC_modules.append(InceptionResNetC(INCEPTION_FILTERS[WEIGHTS_TYPE]['C']))
     for inceptionC_module in inceptionC_modules:
         Z = inceptionC_module(Z)
 
