@@ -7,22 +7,42 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import csv
 
-from torch import conv1d
 
 keras.backend.clear_session()
 
 REDUCTION_FILTERS = {
     'Inception-V4' : {
-        'k' : 192,
-        'l' : 224,
-        'm' : 256,
-        'n' : 384
+        'A' : {
+            'k' : 192,
+            'l' : 224,
+            'm' : 256,
+            'n' : 384
+        },
+        'B' : {
+            'conv2_1': 192,
+            'conv2_2': 192,
+            'conv3_1': 256,
+            'conv3_2': 256,
+            'conv3_3': 320,
+            'conv3_4': 320
+        }
     },
     'Inception-ResNet-V2' : {
-        'k' : 256,
-        'l' : 256,
-        'm' : 384,
-        'n' : 384
+        'A' : {
+            'k' : 192,
+            'l' : 224,
+            'm' : 256,
+            'n' : 384
+        },
+        'B' : {
+            'conv2_1': 256,
+            'conv2_2': 384,
+            'conv3_1': 256,
+            'conv3_2': 288,
+            'conv4_1': 256,
+            'conv4_2': 288,
+            'conv4_3': 320
+        }
     }
 }
 STEM_FILTERS = {
@@ -38,8 +58,69 @@ STEM_FILTERS = {
     'conv7_2': 96,
     'conv9_1': 192
     }
+
 INCEPTION_FILTERS = {
-    
+    'Inception-V4' : {
+        'A' : {
+            'conv1_2': 96,
+            'conv2': 96,
+            'conv3_1': 64,
+            'conv3_2': 96,
+            'conv4_1': 96,
+            'conv4_2': 96,
+            'conv4_3': 96
+        },
+        'B' : {
+            'conv1_2': 128,
+            'conv2': 384,
+            'conv3_1': 192,
+            'conv3_2': 224,
+            'conv3_3': 256,
+            'conv4_1': 192,
+            'conv4_2': 192,
+            'conv4_3': 224,
+            'conv4_4': 224,
+            'conv4_5': 256
+        },
+        'C' : {
+            'conv1_2': 256,
+            'conv2': 256,
+            'conv3_1': 384,
+            'conv3_2_1': 256,
+            'conv3_2_2': 256,
+            'conv4_1': 384,
+            'conv4_2': 448,
+            'conv4_3': 512,
+            'conv4_4_1': 256,
+            'conv4_4_2': 256
+        }
+    },
+    'Inception-ResNet-V2': {
+        'A' : {
+            'conv1': 32,
+            'conv2_1': 32,
+            'conv2_2': 32,
+            'conv3_1': 32,
+            'conv3_2': 48,
+            'conv3_3': 64,
+            'conv4': 384
+        },
+        'B' : {
+            'conv1' : 192,
+            'conv2_1' : 128,
+            'conv2_2' : 160,
+            'conv2_3' : 192,
+            'conv4' : 1154
+        },
+        'C' : {
+            'conv1' : 192,
+            'conv2_1' : 192,
+            'conv2_2' : 224,
+            'conv2_3' : 256,
+            'conv4' : 2048
+        }
+
+    }
 }
 
 
@@ -164,7 +245,6 @@ class ReductionA(keras.layers.Layer):
 
         return self.concat([Z_1, Z_2, Z_3])
 
-
 class InceptionA(keras.layers.Layer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -274,7 +354,6 @@ class ReductionB(keras.layers.Layer):
         Z_3 = self.conv3_4(Z_3)
 
         return self.concat([Z_1, Z_2, Z_3])
-
 
 class InceptionC(keras.layers.Layer):
     def __init__(self, **kwargs):
@@ -406,6 +485,7 @@ class XceptionModule(keras.layers.Layer):
         Z = self.pointwise(Z)
         return keras.layers.BatchNormalization()(Z)
 
+
 class InceptionResNetA(keras.layers.Layer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -488,7 +568,6 @@ class InceptionResNetB(keras.layers.Layer):
 
         return Z
 
-    
 class InceptionResNetC(keras.layers.Layer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -527,7 +606,6 @@ class InceptionResNetC(keras.layers.Layer):
         Z = self.act(Z)
 
         return Z
-
 
 class ReductionResNetB(keras.layers.Layer):
     def __init__(self, **kwargs):
@@ -569,6 +647,9 @@ class ReductionResNetB(keras.layers.Layer):
 
 
 def make_InceptionV4(input_shape=[299, 299, 3], output_dim=150):
+    
+    model_name = 'Inception-V4'
+
     inputs = keras.layers.Input(shape=input_shape)
     stem_module = Stem()
     Z = stem_module(inputs)
@@ -580,7 +661,7 @@ def make_InceptionV4(input_shape=[299, 299, 3], output_dim=150):
     for inceptionA_module in inceptionA_modules:
         Z = inceptionA_module(Z)
 
-    reductionA = ReductionA(REDUCTION_FILTERS[WEIGHTS_TYPE])
+    reductionA = ReductionA(REDUCTION_FILTERS[model_name])
     Z = reductionA(Z)
 
     #7 x inceptioin B
