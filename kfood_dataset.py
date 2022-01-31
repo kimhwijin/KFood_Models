@@ -156,12 +156,14 @@ def make_kfood_dataset(filepaths, n_read_threads=5, shuffle_buffer_size=None, n_
     labels_dataset = tf.data.Dataset.from_tensor_slices(labels)
     
     dataset = tf.data.Dataset.zip((filenames_dataset, labels_dataset))
-    dataset = dataset.shuffle(150000)
+    
+    dataset = dataset.repeat()
+    dataset = dataset.shuffle(len(filepaths))
 
     dataset = dataset.map(parse_and_crop_image, num_parallel_calls=n_parse_threads)
     dataset = dataset.map(resizing_image, num_parallel_calls=n_parse_threads)
     #dataset = filenames_dataset.map(spa)
-    dataset = dataset.repeat()
+    
 
     if cache:
         dataset = dataset.cache()

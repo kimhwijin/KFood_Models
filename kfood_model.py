@@ -647,7 +647,6 @@ class ReductionResNetB(keras.layers.Layer):
 
 
 
-
 def make_InceptionV4(input_shape=[299, 299, 3], output_dim=150):
     
     WEIGHTS_TYPE = 'Inception-V4'
