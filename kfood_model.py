@@ -25,6 +25,24 @@ REDUCTION_FILTERS = {
         'n' : 384
     }
 }
+STEM_FILTERS = {
+    'conv1': 32, 
+    'conv2': 32, 
+    'conv3': 64,
+    'conv4_2': 32,
+    'conv6_1': 64, 
+    'conv6_2': 64,
+    'conv6_3': 96,
+    'conv6_4': 96, 
+    'conv7_1': 64,
+    'conv7_2': 96,
+    'conv9_1': 192
+    }
+INCEPTION_FILTERS = {
+    
+}
+
+
 WEIGHTS_TYPE = 'Inception-V4'
 
 def conv2d_bn(filters, kernel_size, padding='v', strides=1, activation='relu', **kwargs):
@@ -58,7 +76,7 @@ def avg_pool2d(pool_size='2x2', padding='v', strides=1):
 
 
 class Stem(keras.layers.Layer):
-    def __init__(self, **kwargs):
+    def __init__(self, filters=STEM_FILTERS, **kwargs):
         super().__init__(**kwargs)
         #conv 32 3x3 2 v
         #conv 32 3x3 v
@@ -71,26 +89,26 @@ class Stem(keras.layers.Layer):
         #conv 192 3x3 v / max pool 2 v
         
         #299x299x3
-        self.conv1 = conv2d_bn(32, '3x3', 'v', 2) #149x149x3
-        self.conv2 = conv2d_bn(32, '3x3', 'v', 1) #147x147x3
-        self.conv3 = conv2d_bn(64, '3x3', 's', 1) #147x147x3
+        self.conv1 = conv2d_bn(filters['conv1'], '3x3', 'v', 2) #149x149x3
+        self.conv2 = conv2d_bn(filters['conv2'], '3x3', 'v', 1) #147x147x3
+        self.conv3 = conv2d_bn(filters['conv3'], '3x3', 's', 1) #147x147x3
 
         self.max_pool4_1 = max_pool2d('3x3', 'v', 2) #1
-        self.conv4_2 = conv2d_bn(32, '3x3', 'v', 2)
+        self.conv4_2 = conv2d_bn(filters['conv4_2'], '3x3', 'v', 2)
         
         self.concat5 = keras.layers.Concatenate(axis=-1)
         
-        self.conv6_1 = conv2d_bn(64, '1x1', 's', 1)
-        self.conv6_2 = conv2d_bn(64, '7x1', 's', 1)
-        self.conv6_3 = conv2d_bn(96, '1x7', 's', 1)
-        self.conv6_4 = conv2d_bn(96, '3x3', 'v', 1)
+        self.conv6_1 = conv2d_bn(filters['conv6_1'], '1x1', 's', 1)
+        self.conv6_2 = conv2d_bn(filters['conv6_2'], '7x1', 's', 1)
+        self.conv6_3 = conv2d_bn(filters['conv6_3'], '1x7', 's', 1)
+        self.conv6_4 = conv2d_bn(filters['conv6_4'], '3x3', 'v', 1)
 
-        self.conv7_1 = conv2d_bn(64, '1x1', 's', 1)
-        self.conv7_2 = conv2d_bn(96, '3x3', 'v', 1)
+        self.conv7_1 = conv2d_bn(filters['conv7_1'], '1x1', 's', 1)
+        self.conv7_2 = conv2d_bn(filters['conv7_2'], '3x3', 'v', 1)
 
         self.concat8 = keras.layers.Concatenate(axis=-1)
 
-        self.conv9_1 = conv2d_bn(192, '3x3', 'v', 2)
+        self.conv9_1 = conv2d_bn(filters['conv9_1'], '3x3', 'v', 2)
         self.max_pool9_2 = max_pool2d('2x2', 'v', 2)
 
         self.concat10 = keras.layers.Concatenate(axis=-1)
