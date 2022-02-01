@@ -1,22 +1,27 @@
+from matplotlib import use
 import tensorflow as tf
 from tensorflow import keras
 
-def conv2d_bn(filters, kernel_size, padding='v', strides=1, activation='relu', **kwargs):
-    
-    padding = 'valid' if padding == 'v' else 'same'
-    x, y = kernel_size.split('x')
-    kernel_size = [int(x), int(y)]
-    return keras.models.Sequential([
-        keras.layers.Conv2D(filters=filters, kernel_size=kernel_size, strides=strides, padding=padding,**kwargs),
-        keras.layers.BatchNormalization(scale=False),
-        keras.layers.Activation(activation),
-    ])
 
-def conv2d(filters, kernel_size, padding='v', strides=1, activation='relu', **kwargs):
+def conv2d_bn(filters, kernel_size, padding='v', strides=1, activation='relu', use_bias=False, **kwargs):
+
     padding = 'valid' if padding == 'v' else 'same'
     x, y = kernel_size.split('x')
     kernel_size = [int(x), int(y)]
-    return keras.layers.Conv2D(filters=filters, kernel_size=kernel_size, strides=strides, padding=padding,activation=activation, **kwargs)
+    model = keras.models.Sequential([
+        keras.layers.Conv2D(filters=filters, kernel_size=kernel_size, strides=strides, padding=padding, use_bias=use_bias, **kwargs),
+    ])
+    if not use_bias:
+        model.add(keras.layers.BatchNormalization(scale=False))
+    if activation:
+        model.add(keras.layers.Activation(activation))
+    return 
+
+def conv2d(filters, kernel_size, padding='v', strides=1, activation='relu', use_bias=False, **kwargs):
+    padding = 'valid' if padding == 'v' else 'same'
+    x, y = kernel_size.split('x')
+    kernel_size = [int(x), int(y)]
+    return keras.layers.Conv2D(filters=filters, kernel_size=kernel_size, strides=strides, padding=padding,activation=activation, use_bias=use_bias, **kwargs)
 
 
 def max_pool2d(pool_size='2x2', padding='v', strides=1):
