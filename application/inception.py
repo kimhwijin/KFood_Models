@@ -1,10 +1,6 @@
-from calendar import c
-
-
 import tensorflow as tf
 from tensorflow import keras
-from custom_layers import *
-
+from application.custom_layers import *
 
 class Stem(keras.layers.Layer):
     def __init__(self, filters, **kwargs):
@@ -18,20 +14,20 @@ class Stem(keras.layers.Layer):
         self.conv1 = conv2d_bn(filters['conv1'], '3x3', 'v', 1)
         #64
         self.conv2 = conv2d_bn(filters['conv2'], '3x3', 's', 1)
-        self.max_pool3 = max_pool2d('3x3', 's', 2)
+        self.max_pool3 = max_pool2d('3x3', 'v', 2)
 
         #80
         self.conv4 = conv2d_bn(filters['conv4'], '1x1', 'v', 1)
         #192
         self.conv5 = conv2d_bn(filters['conv5'], '3x3', 'v', 1)
-        self.max_pool6 = max_pool2d('3x3', 's', 2)
+        self.max_pool6 = max_pool2d('3x3', 'v', 2)
 
         #96
         self.branch0 = conv2d_bn(filters['branch0'], '1x1', 's', 1)
         #48
         self.branch1_0 = conv2d_bn(filters['branch1_0'], '1x1', 's', 1)
         #64
-        self.branch1_1 = conv2d_bn(filters['branch1_2'], '5x5', 's', 1)
+        self.branch1_1 = conv2d_bn(filters['branch1_1'], '5x5', 's', 1)
         #64
         self.branch2_0 = conv2d_bn(filters['branch2_0'], '1x1', 's', 1)
         #96
@@ -72,7 +68,6 @@ class Stem(keras.layers.Layer):
         return self.concat(branches)
 
     
-
 class Block35(keras.layers.Layer):
     def __init__(self, filters, scale=0.17, activation='relu', **kwargs):
         super().__init__(**kwargs)
@@ -104,9 +99,8 @@ class Block35(keras.layers.Layer):
         shape = keras.backend.int_shape(x)
         self.up = conv2d_bn(shape[3], '1x1', 's', 1, activation=None, use_bias=True)
         self.scale_mix = keras.layers.Lambda(
-            lambda inputs, scale: inputs[0] + inputs[1] * scale,
+            lambda inputs : inputs[0] + inputs[1] * self.scale,
             output_shape=shape[1:],
-            arguments={'scale', self.scale},
         )
 
         #call layers
@@ -130,7 +124,6 @@ class Block35(keras.layers.Layer):
             x = keras.layers.Activation(self.act)(x)
         return x
 
-
 class Block17(keras.layers.Layer):
     def __init__(self, filters, scale=0.1, activation='relu', **kwargs):
         super().__init__(**kwargs)
@@ -139,14 +132,14 @@ class Block17(keras.layers.Layer):
         self.scale = scale
 
         #192
-        self.branch0 = conv2d_bn(filters['branch0'], '1x1', 's', 1, activation=activation)
+        self.branch0 = conv2d_bn(filters['branch0'], '1x1', 's', 1)
 
         #128
-        self.branch1_0 = conv2d_bn(filters['branch1_0'], '1x1', 's', 1, activation=activation)
+        self.branch1_0 = conv2d_bn(filters['branch1_0'], '1x1', 's', 1)
         #160
-        self.branch1_1 = conv2d_bn(filters['branch1_1'], '1x7', 's', 1, activation=activation)
+        self.branch1_1 = conv2d_bn(filters['branch1_1'], '1x7', 's', 1)
         #192
-        self.branch1_2 = conv2d_bn(filters['branch1_2'], '7x1', 's', 1, activation=activation)
+        self.branch1_2 = conv2d_bn(filters['branch1_2'], '7x1', 's', 1)
 
         self.concat = keras.layers.Concatenate(axis=-1)
 
@@ -158,9 +151,8 @@ class Block17(keras.layers.Layer):
         shape = keras.backend.int_shape(x)
         self.up = conv2d_bn(shape[3], '1x1', 's', 1, activation=None, use_bias=True)
         self.scale_mix = keras.layers.Lambda(
-            lambda inputs, scale: inputs[0] + inputs[1] * scale,
+            lambda inputs: inputs[0] + inputs[1] * self.scale,
             output_shape=shape[1:],
-            arguments={'scale', self.scale},
         )
 
         branch_0 = self.branch0(x)
@@ -180,7 +172,6 @@ class Block17(keras.layers.Layer):
             x = keras.layers.Activation(self.act)(x)
 
         return x
-
 
 class Block8(keras.layers.Layer):
     def __init__(self, filters, scale=0.2, activation='relu', **kwargs):
@@ -190,14 +181,14 @@ class Block8(keras.layers.Layer):
         self.scale = scale
 
         #192
-        self.branch0 = conv2d_bn(filters['branch0'], '1x1', 's', 1, activation=activation)
+        self.branch0 = conv2d_bn(filters['branch0'], '1x1', 's', 1)
 
         #192
-        self.branch1_0 = conv2d_bn(filters['branch1_0'], '1x1', 's', 1, activation=activation)
+        self.branch1_0 = conv2d_bn(filters['branch1_0'], '1x1', 's', 1)
         #224
-        self.branch1_1 = conv2d_bn(filters['branch1_1'], '1x3', 's', 1, activation=activation)
+        self.branch1_1 = conv2d_bn(filters['branch1_1'], '1x3', 's', 1)
         #256
-        self.branch1_2 = conv2d_bn(filters['branch1_2'], '3x1', 's', 1, activation=activation)
+        self.branch1_2 = conv2d_bn(filters['branch1_2'], '3x1', 's', 1)
 
         self.concat = keras.layers.Concatenate(axis=-1)
 
@@ -207,11 +198,11 @@ class Block8(keras.layers.Layer):
         
         #layer define
         shape = keras.backend.int_shape(x)
+        #input channels = filters
         self.up = conv2d_bn(shape[3], '1x1', 's', 1, activation=None, use_bias=True)
         self.scale_mix = keras.layers.Lambda(
-            lambda inputs, scale: inputs[0] + inputs[1] * scale,
+            lambda inputs: inputs[0] + inputs[1] * self.scale,
             output_shape=shape[1:],
-            arguments={'scale', self.scale},
         )
 
         branch_0 = self.branch0(x)
@@ -231,3 +222,87 @@ class Block8(keras.layers.Layer):
             x = keras.layers.Activation(self.act)(x)
 
         return x
+
+
+class ReductionA(keras.layers.Layer):
+    def __init__(self, filters, **kwargs):
+        super().__init__(**kwargs)
+
+        #384
+        self.branch0 = conv2d_bn(filters['branch0'], '3x3', 'v', 2)
+
+        #256
+        self.branch1_0 = conv2d_bn(filters['branch1_0'], '1x1', 's', 1)
+        #256
+        self.branch1_1 = conv2d_bn(filters['branch1_1'], '3x3', 's', 1)
+        #384
+        self.branch1_2 = conv2d_bn(filters['branch1_2'], '3x3', 'v', 2)
+
+        self.branch_pool = max_pool2d('3x3', 'v', 2)
+
+        self.concat = keras.layers.Concatenate(axis=-1)
+
+    
+    def call(self, inputs):
+        x = inputs
+
+        branch_0 = self.branch0(x)
+
+        branch_1 = self.branch1_0(x)
+        branch_1 = self.branch1_1(branch_1)
+        branch_1 = self.branch1_2(branch_1)
+
+        branch_pool = self.branch_pool(x)
+
+        branches = [branch_0, branch_1, branch_pool]
+
+        mixed = self.concat(branches)
+        return mixed
+
+
+
+class ReductionB(keras.layers.Layer):
+    def __init__(self, filters, **kwargs):
+        super().__init__(**kwargs)
+        
+        #256
+        self.branch0_0 = conv2d_bn(filters['branch0_0'], '1x1', 's', 1)
+        #384
+        self.branch0_1 = conv2d_bn(filters['branch0_1'], '3x3', 'v', 2)
+
+        #256
+        self.branch1_0 = conv2d_bn(filters['branch1_0'], '1x1', 's', 1)
+        #288
+        self.branch1_1 = conv2d_bn(filters['branch1_1'], '3x3', 'v', 2)
+
+        #256
+        self.branch2_0 = conv2d_bn(filters['branch2_0'], '1x1', 's', 1)
+        #288
+        self.branch2_1 = conv2d_bn(filters['branch2_1'], '3x3', 's', 1)
+        #320
+        self.branch2_2 = conv2d_bn(filters['branch2_2'], '3x3', 'v', 2)
+
+        self.branch_pool = max_pool2d('3x3', 'v', 2)
+
+        self.concat = keras.layers.Concatenate(axis=-1)
+
+    
+    def call(self, inputs):
+        x = inputs
+
+        branch_0 = self.branch0_0(x)
+        branch_0 = self.branch0_1(branch_0)
+
+        branch_1 = self.branch1_0(x)
+        branch_1 = self.branch1_1(branch_1)
+        
+        branch_2 = self.branch2_0(x)
+        branch_2 = self.branch2_1(branch_2)
+        branch_2 = self.branch2_2(branch_2)
+
+        branch_pool = self.branch_pool(x)
+
+        branches = [branch_0, branch_1, branch_2, branch_pool]
+
+        mixed = self.concat(branches)
+        return mixed

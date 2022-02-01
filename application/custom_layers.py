@@ -1,5 +1,3 @@
-from matplotlib import use
-import tensorflow as tf
 from tensorflow import keras
 
 
@@ -15,7 +13,7 @@ def conv2d_bn(filters, kernel_size, padding='v', strides=1, activation='relu', u
         model.add(keras.layers.BatchNormalization(scale=False))
     if activation:
         model.add(keras.layers.Activation(activation))
-    return 
+    return model
 
 def conv2d(filters, kernel_size, padding='v', strides=1, activation='relu', use_bias=False, **kwargs):
     padding = 'valid' if padding == 'v' else 'same'
