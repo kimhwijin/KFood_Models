@@ -72,7 +72,7 @@ class Block35(keras.layers.Layer):
     def __init__(self, filters, scale=0.17, activation='relu', **kwargs):
         super().__init__(**kwargs)
 
-        self.act = activation
+        self.activation = activation
         self.scale = scale
 
         #32
@@ -98,6 +98,13 @@ class Block35(keras.layers.Layer):
             output_shape=[32, 32, 320],
         )
 
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            "activation": self.activation,
+            "scale": self.scale,
+        })
+        return config
 
     def call(self, inputs):
 
@@ -149,6 +156,14 @@ class Block17(keras.layers.Layer):
             lambda inputs: inputs[0] + inputs[1] * self.scale,
             output_shape=[17, 17, 1088],
         )
+
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            "activation": self.activation,
+            "scale": self.scale,
+        })
+        return config
         
     def call(self, inputs):
         x = inputs
@@ -197,6 +212,14 @@ class Block8(keras.layers.Layer):
             lambda inputs: inputs[0] + inputs[1] * self.scale,
             output_shape=[8, 8, 2080],
         )
+        
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            "activation": self.activation,
+            "scale": self.scale,
+        })
+        return config
         
     def call(self, inputs):
         x = inputs
