@@ -140,14 +140,23 @@ def central_crop(image):
     return image[top_crop : bottom_crop, left_crop : right_crop]
 
 
-def resizing_image(image, label):
-    image = central_crop(image)
+def resizing_image(image, label, randomize):
+    if randomize:
+        image = random_crop(image)
+    else:
+        image = central_crop(image)
     image = tf.image.resize(image, IMAGE_SIZE, method="nearest")
     image = tf.cast(image, tf.float32) / 255.
     return image , label
 
 
-def make_kfood_dataset(filepaths, n_read_threads=5, shuffle_buffer_size=None, n_parse_threads=5, batch_size=32, cache=False):
+def random_crop(image):
+    shape = tf.shape(image)
+    min_dim = tf.reduce_min([shape[0], shape[1]]) * 90 // 100
+    return tf.image.random_crop(image, [min_dim, min_dim, 3])
+
+
+def make_kfood_dataset(filepaths, shuffle_buffer_size=None, n_parse_threads=5, batch_size=32, randomize=True ,cache=False):
 
     filenames_dataset = tf.data.Dataset.from_tensor_slices(filepaths)
 
@@ -161,7 +170,7 @@ def make_kfood_dataset(filepaths, n_read_threads=5, shuffle_buffer_size=None, n_
     dataset = dataset.shuffle(len(filepaths))
 
     dataset = dataset.map(parse_and_crop_image, num_parallel_calls=n_parse_threads)
-    dataset = dataset.map(resizing_image, num_parallel_calls=n_parse_threads)
+    dataset = dataset.map(lambda image, label : resizing_image(image, label, randomize), num_parallel_calls=n_parse_threads)
     #dataset = filenames_dataset.map(spa)
     
 
