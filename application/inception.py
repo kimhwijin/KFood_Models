@@ -6,6 +6,8 @@ class Stem(keras.layers.Layer):
     def __init__(self, filters, **kwargs):
         super().__init__(**kwargs)
 
+        self.filters = filters
+        
         #299x299x3
         #32
         self.conv0 = conv2d_bn(filters['conv0'], 3, 'v', 2)
@@ -40,6 +42,13 @@ class Stem(keras.layers.Layer):
         self.branch_pool_2 = conv2d_bn(filters['branch_pool_2'], 1, 's', 1)
 
         self.concat = keras.layers.Concatenate(axis=-1)
+
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            "filters": self.filters,
+        })
+        return config
     
     def call(self, inputs):
         x = inputs
@@ -74,6 +83,7 @@ class Block35(keras.layers.Layer):
 
         self.activation = activation
         self.scale = scale
+        self.filters = filters
 
         #32
         self.branch0 = conv2d_bn(filters['branch0'], 1, 's', 1, activation=activation)
@@ -101,6 +111,7 @@ class Block35(keras.layers.Layer):
     def get_config(self):
         config = super().get_config()
         config.update({
+            "filters": self.filters,
             "activation": self.activation,
             "scale": self.scale,
         })
@@ -127,16 +138,17 @@ class Block35(keras.layers.Layer):
 
         x = self.scale_mix([x, up])
 
-        if self.act is not None:
-            x = keras.layers.Activation(self.act)(x)
+        if self.activation is not None:
+            x = keras.layers.Activation(self.activation)(x)
         return x
 
 class Block17(keras.layers.Layer):
     def __init__(self, filters, scale=0.1, activation='relu', **kwargs):
         super().__init__(**kwargs)
 
-        self.act = activation
+        self.activation = activation
         self.scale = scale
+        self.filters = filters
 
         #192
         self.branch0 = conv2d_bn(filters['branch0'], 1, 's', 1)
@@ -160,6 +172,7 @@ class Block17(keras.layers.Layer):
     def get_config(self):
         config = super().get_config()
         config.update({
+            "filters": self.filters,
             "activation": self.activation,
             "scale": self.scale,
         })
@@ -181,8 +194,8 @@ class Block17(keras.layers.Layer):
 
         x = self.scale_mix([x, up])
 
-        if self.act is not None:
-            x = keras.layers.Activation(self.act)(x)
+        if self.activation is not None:
+            x = keras.layers.Activation(self.activation)(x)
 
         return x
 
@@ -190,8 +203,9 @@ class Block8(keras.layers.Layer):
     def __init__(self, filters, scale=0.2, activation='relu', **kwargs):
         super().__init__(**kwargs)
 
-        self.act = activation
+        self.activation = activation
         self.scale = scale
+        self.filters = filters
 
         #192
         self.branch0 = conv2d_bn(filters['branch0'], 1, 's', 1)
@@ -212,10 +226,11 @@ class Block8(keras.layers.Layer):
             lambda inputs: inputs[0] + inputs[1] * self.scale,
             output_shape=[8, 8, 2080],
         )
-        
+
     def get_config(self):
         config = super().get_config()
         config.update({
+            "filters": self.filters,
             "activation": self.activation,
             "scale": self.scale,
         })
@@ -237,8 +252,8 @@ class Block8(keras.layers.Layer):
 
         x = self.scale_mix([x, up])
 
-        if self.act is not None:
-            x = keras.layers.Activation(self.act)(x)
+        if self.activation is not None:
+            x = keras.layers.Activation(self.activation)(x)
 
         return x
 
@@ -246,6 +261,8 @@ class Block8(keras.layers.Layer):
 class ReductionA(keras.layers.Layer):
     def __init__(self, filters, **kwargs):
         super().__init__(**kwargs)
+
+        self.filters = filters
 
         #384
         self.branch0 = conv2d_bn(filters['branch0'], 3, 'v', 2)
@@ -261,7 +278,13 @@ class ReductionA(keras.layers.Layer):
 
         self.concat = keras.layers.Concatenate(axis=-1)
 
-    
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            "filters": self.filters,
+        })
+        return config
+
     def call(self, inputs):
         x = inputs
 
@@ -283,6 +306,8 @@ class ReductionA(keras.layers.Layer):
 class ReductionB(keras.layers.Layer):
     def __init__(self, filters, **kwargs):
         super().__init__(**kwargs)
+
+        self.filters = filters
         
         #256
         self.branch0_0 = conv2d_bn(filters['branch0_0'], 1, 's', 1)
@@ -305,6 +330,12 @@ class ReductionB(keras.layers.Layer):
 
         self.concat = keras.layers.Concatenate(axis=-1)
 
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            "filters": self.filters,
+        })
+        return config
     
     def call(self, inputs):
         x = inputs
