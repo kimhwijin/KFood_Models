@@ -32,7 +32,7 @@ def InceptionResNetV2(input_shape=[299, 299, 3], n_classes=150):
     #8 x 8 x 1536
     x = conv2d_bn(1536, '1x1', 's', 1)(x)
 
-    x = avg_pool2d()(x)
+    x = keras.layers.GlobalAveragePooling2D()(x)
     output = keras.layers.Dense(n_classes, activation='softmax')(x)
 
     return keras.models.Model(inputs=[img_input], outputs=[output])
