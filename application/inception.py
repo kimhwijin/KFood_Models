@@ -96,11 +96,10 @@ class Block35(keras.layers.Layer):
         x = inputs
         
         #layer define
-        shape = keras.backend.int_shape(x)
-        self.up = conv2d_bn(shape[3], '1x1', 's', 1, activation=None, use_bias=True)
+        self.up = conv2d_bn(keras.backend.int_shape(x)[3], '1x1', 's', 1, activation=None, use_bias=True)
         self.scale_mix = keras.layers.Lambda(
             lambda inputs : inputs[0] + inputs[1] * self.scale,
-            output_shape=shape[1:],
+            output_shape=keras.backend.int_shape(x)[1:],
         )
 
         #call layers
@@ -148,11 +147,10 @@ class Block17(keras.layers.Layer):
         x = inputs
         
         #layer define
-        shape = keras.backend.int_shape(x)
-        self.up = conv2d_bn(shape[3], '1x1', 's', 1, activation=None, use_bias=True)
+        self.up = conv2d_bn(keras.backend.int_shape(x)[3], '1x1', 's', 1, activation=None, use_bias=True)
         self.scale_mix = keras.layers.Lambda(
             lambda inputs: inputs[0] + inputs[1] * self.scale,
-            output_shape=shape[1:],
+            output_shape=keras.backend.int_shape(x)[1:],
         )
 
         branch_0 = self.branch0(x)
@@ -197,12 +195,11 @@ class Block8(keras.layers.Layer):
         x = inputs
         
         #layer define
-        shape = keras.backend.int_shape(x)
         #input channels = filters
-        self.up = conv2d_bn(shape[3], '1x1', 's', 1, activation=None, use_bias=True)
+        self.up = conv2d_bn(keras.backend.int_shape(x)[3], '1x1', 's', 1, activation=None, use_bias=True)
         self.scale_mix = keras.layers.Lambda(
             lambda inputs: inputs[0] + inputs[1] * self.scale,
-            output_shape=shape[1:],
+            output_shape=keras.backend.int_shape(x)[1:],
         )
 
         branch_0 = self.branch0(x)
