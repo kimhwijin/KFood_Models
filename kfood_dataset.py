@@ -46,8 +46,8 @@ with open('class_to_label.txt','r', encoding='utf8') as f:
 #class_to_label = {}
 #for _class, _label in zip(classes, labels):
 #    class_to_label[_class] = int(_label)
-LABELS = tuple(LABELS)
-CLASSES = tuple(CLASSES)
+LABELS = np.array(LABELS)
+CLASSES = np.array(CLASSES)
 if len(LABELS) == len(CLASSES):
     n_labels = len(LABELS)
 
@@ -190,7 +190,7 @@ def plot_dataset_image_4(dataset):
         for i in range(4):
             plt.subplot(1, 4, i+1)
             plt.imshow(images[i])
-            print(tf.where(labels[i] == 1))
+            print(CLASSES[tf.where(labels[i] == 1)[0][0]], end=' ')
 
 def dataset_valid_check(paths):
     from tqdm import tqdm
