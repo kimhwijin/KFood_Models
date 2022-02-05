@@ -159,8 +159,7 @@ def random_crop(image):
 def make_kfood_dataset(filepaths, shuffle_buffer_size=None, n_parse_threads=5, batch_size=32, randomize=True ,cache=False):
 
     filenames_dataset = tf.data.Dataset.from_tensor_slices(filepaths)
-
-    labels = [LABELS[CLASSES.index(filepath.split('/')[-2])] for filepath in filepaths]
+    labels = [LABELS[np.where(CLASSES == filepath.split('/')[-2])[0][0]] for filepath in filepaths]
     labels = tf.one_hot(labels, n_labels, dtype=tf.uint8)
     labels_dataset = tf.data.Dataset.from_tensor_slices(labels)
     
