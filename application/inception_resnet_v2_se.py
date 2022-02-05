@@ -12,7 +12,7 @@ def InceptionResNetV2SEBlock(input_shape=[299, 299, 3], n_classes=150, squeeze_r
 
     #35 x 35 x 320
     channel = keras.backend.int_shape(x)[-1]
-    for _ in range(10):
+    for _ in range(7):
         x = block35(x, weights.BLOCK35)
         x = se_block(x, channel, squeeze_ratio)
     
@@ -20,7 +20,7 @@ def InceptionResNetV2SEBlock(input_shape=[299, 299, 3], n_classes=150, squeeze_r
 
     #17 x 17 x 1088
     channel = keras.backend.int_shape(x)[-1]
-    for _ in range(20):
+    for _ in range(12):
         x = block17(x, weights.BLOCK17)
         x = se_block(x, channel, squeeze_ratio)
 
@@ -28,7 +28,7 @@ def InceptionResNetV2SEBlock(input_shape=[299, 299, 3], n_classes=150, squeeze_r
 
     #8 x 8 x 2080
     channel = keras.backend.int_shape(x)[-1]
-    for _ in range(9):
+    for _ in range(6):
         x = block8(x, weights.BLOCK8)
         x = se_block(x, channel, squeeze_ratio)
     
