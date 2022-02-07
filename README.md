@@ -18,14 +18,14 @@
 압축 해제 전
 
 -kfood.zip
---class1.zip
+--구이.zip
 --...
 
 후
 
 -kfood
---class1
----subclass1
+--구이
+---갈비구이
 ----crop_area.properties
 ----Img_000_0000.jpg
 ----...
