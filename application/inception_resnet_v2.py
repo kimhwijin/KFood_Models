@@ -1,13 +1,11 @@
-from xml.sax.xmlreader import InputSource
 from tensorflow import keras
-import tensorflow as tf
-from application.keras_inception import *
-from application.FILTERS import KerasInceptionResNetV2_Filters
+from application.inception import *
+from application.FILTERS import InceptionResNetV2_Filters
 
-def KerasInceptionResNetV2(input_shape=[299, 299, 3], n_classes=150):
+def InceptionResNetV2(input_shape=[299, 299, 3], n_classes=150):
     img_input = keras.layers.Input(shape=input_shape)
 
-    filters = KerasInceptionResNetV2_Filters()
+    filters = InceptionResNetV2_Filters()
 
     x = stem(img_input, filters.STEM)
 
@@ -34,7 +32,7 @@ def KerasInceptionResNetV2(input_shape=[299, 299, 3], n_classes=150):
     #8x8x2144
     x = keras.layers.GlobalAveragePooling2D()(x)
     x = keras.layers.Dropout(0.8)(x)
-    
+
     output = keras.layers.Dense(n_classes, activation='softmax')(x)
 
     return keras.models.Model(inputs=[img_input], outputs=[output])
