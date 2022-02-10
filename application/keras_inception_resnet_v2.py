@@ -1,13 +1,13 @@
 from xml.sax.xmlreader import InputSource
 from tensorflow import keras
 import tensorflow as tf
-from application.inception import *
-from application.WEIGHTS import KerasInceptionResNetV2_Weights
+from application.keras_inception import *
+from application.FILTERS import KerasInceptionResNetV2_Filters
 
 def KerasInceptionResNetV2(input_shape=[299, 299, 3], n_classes=150):
     img_input = keras.layers.Input(shape=input_shape)
 
-    weights = KerasInceptionResNetV2_Weights()
+    weights = KerasInceptionResNetV2_Filters()
 
     x = stem(img_input, weights.STEM)
 
