@@ -80,6 +80,7 @@ tf.data.Dataset 을 이용한 데이터 파이프라인 구축 : [kfood_dataset.
 |모델|정확도(테스트 세트)|Learning Rate|Decay(rho)|Momentum|Epsilon|Learning Rate Decay|
 |---|---|---|---|---|---|---|
 |KerasInceptionResNetV2|-|0.045|0.9|0.0|1.0|0.94(exp, per 2 epochs)|
+|KerasInceptionResNetV2|-|0.001|0.9|0.9|1.0|-|
 |InceptionResNetV2|-|0.045|0.9|0.0|1.0|0.94(exp, per 2 epochs)|
 |KerasInceptionResNetV2SEBlock|-|0.045|0.9|0.0|1.0|0.94(exp, per 2 epochs)|
 
