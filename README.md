@@ -33,7 +33,7 @@
 --...
 
 ```
-train : 0.64, test : 0.2, valid : 0.16
+train : 0.7, test : 0.2, valid : 0.1
 
 ## Dataset
 
