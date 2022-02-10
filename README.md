@@ -33,7 +33,9 @@
 --...
 
 ```
-train : 0.7, test : 0.2, valid : 0.1
+train : 70%
+test : 20%
+valid : 10%
 
 ## Dataset
 
