@@ -1,12 +1,12 @@
 from tensorflow import keras
 from application.inception import *
 from application.squeeze_excitation_block import *
-from application.WEIGHTS import *
+from application.WEIGHTS import KerasInceptionResNetV2_Weights
 
 def InceptionResNetV2SEBlock(input_shape=[299, 299, 3], n_classes=150, squeeze_ratio=4):
     img_input = keras.layers.Input(shape=input_shape)
 
-    weights = InceptionResNetV2_Weights()
+    weights = KerasInceptionResNetV2_Weights()
 
     x = stem(img_input, weights.STEM)
 

@@ -1,4 +1,4 @@
-class InceptionResNetV2_Weights():
+class KerasInceptionResNetV2_Weights():
     def __init__(self):
         self.STEM = {
             'conv0': 32,
