@@ -75,8 +75,8 @@ def train(
 
     if train_property['optimizer']['name'] == 'SGD':
         optimizer = keras.optimizers.SGD(**train_property['optimizer']['kwargs'])
-    elif train_property['optimizer']['name'] == 'RMSProp':
-        optimizer = keras.optimizers.RMSProp(**train_property['optimizer']['kwargs'])
+    elif train_property['optimizer']['name'] == 'RMSprop':
+        optimizer = keras.optimizers.RMSprop(**train_property['optimizer']['kwargs'])
     elif train_property['optimizer']['name'] == 'Adam':
         optimizer = keras.optimizers.Adam(**train_property['optimizer']['kwargs'])
 
