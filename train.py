@@ -56,7 +56,13 @@ def train(
         from application.inception_resnet_v2 import InceptionResNetV2
         model = InceptionResNetV2()
 
-    train_property_name = train_property['optimizer']['name'] + train_property['crop']
+    train_property_name = train_property['optimizer']['name']
+    train_property_name += '_lr:' + str(train_property['optimizer']['kwargs']['learning_rate'])
+    if lr_schedule:
+        train_property_name += '_decay:' + str(train_property['optimizer']['lr_decay'])
+    train_property_name += '_crop:' + train_property['crop']
+       
+    
     weights_save_path = weights_save_path / model_name / train_property_name
 
     if pretrained:
