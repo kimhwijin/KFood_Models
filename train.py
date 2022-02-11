@@ -78,7 +78,7 @@ def train(
         lr_decay = train_property['optimizer']['lr_decay']
         callbacks.append(keras.callbacks.LearningRateScheduler(
             lambda epoch, lr: lr * lr_decay if epoch % 2 == 0 else lr
-        )
+        ))
 
     if train_property['optimizer']['name'] == 'SGD':
         optimizer = keras.optimizers.SGD(**train_property['optimizer']['kwargs'])
