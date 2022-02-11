@@ -52,6 +52,9 @@ def train(
     elif model_name=='KerasInceptionResNetV2SEBlock':
         from application.keras_inception_resnet_v2_se import KerasInceptionResNetV2SEBlock
         model = KerasInceptionResNetV2SEBlock()
+    elif model_name=='InceptionResNetV2':
+        from application.inception_resnet_v2 import InceptionResNetV2
+        model = InceptionResNetV2()
 
     train_property_name = train_property['optimizer']['name'] + train_property['crop']
     weights_save_path = weights_save_path / model_name / train_property_name
@@ -90,9 +93,10 @@ def train(
 
     model.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
-    return model.fit(train_set, steps_per_epoch=steps_per_epoch,
+    history = model.fit(train_set, steps_per_epoch=steps_per_epoch,
             validation_data=valid_set, validation_steps=validation_steps,
             epochs=epochs,
             callbacks=callbacks,
     )
+    return model, history
         
