@@ -40,6 +40,7 @@ def train(
                 'epsilon' : 1.0,
                 }
         },
+        'batch': 32,
         'crop' : 'random',
     },
     lr_schedule=True,
@@ -60,8 +61,9 @@ def train(
     train_property_name += '_lr:' + str(train_property['optimizer']['kwargs']['learning_rate'])
     if lr_schedule:
         train_property_name += '_decay:' + str(train_property['optimizer']['lr_decay'])
+    train_property_name += '_batch:' + train_property['batch']
     train_property_name += '_crop:' + train_property['crop']
-       
+    
     
     weights_save_path = weights_save_path / model_name / train_property_name
 
