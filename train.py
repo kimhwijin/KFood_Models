@@ -15,7 +15,7 @@ class WeightsSaver(keras.callbacks.Callback):
         self.model.save_weights(self.weights_save_path / "epoch:{}_acc:{:.2f}.weights".format(epoch, logs['val_accuracy']))
         self.loss = np.append(self.loss, logs["loss"])
         plt.plot(np.arange(1, epoch+2), self.loss)
-        plt.axis([1, self.epochs, 1, self.loss[0] * 1.5])
+        plt.axis([1, self.epochs, 0, self.loss[0] * 1.5])
         plt.savefig(self.weights_save_path / "loss.png", format="png", dpi=300)
         
 
