@@ -18,7 +18,8 @@ class WeightsSaver(keras.callbacks.Callback):
         plt.axis([1, self.epochs, 0, self.loss[0] * 1.2])
         plt.savefig(self.weights_save_path / "loss.png", format="png", dpi=300)
         
-
+    
+        
 def train(
     train_set,
     valid_set,
@@ -28,19 +29,20 @@ def train(
     pretrained=False,
     save_best_weights=True,
     save_weights_per_epoch=True,
-    weights_save_path=Path('drive/MyDrive/kfood'),
+    weights_save_path=Path('drive/MyDrive/Model/kfood'),
     train_property={
         'optimizer' : {
             'name' : 'RMSProp',
+            'lr_decay': 0.94,
             'kwargs' : {
-                'learning_rate' : 0.001,
+                'learning_rate' : 0.045,
                 'rho' : 0.9,
-                'momentum' : 0.9,
                 'epsilon' : 1.0,
                 }
         },
         'crop' : 'random',
     },
+    lr_schedule=True,
     model_name='KerasInceptionResNetV2',
     ):
 
@@ -71,7 +73,12 @@ def train(
     if save_weights_per_epoch:
         weights_saver = WeightsSaver(weights_save_path=weights_save_path, epochs=epochs)
         callbacks.append(weights_saver)
-
+    
+    if lr_schedule:
+        lr_decay = train_property['optimizer']['lr_decay']
+        callbacks.append(keras.callbacks.LearningRateScheduler(
+            lambda epoch, lr: lr * lr_decay if epoch % 2 == 0 else lr
+        )
 
     if train_property['optimizer']['name'] == 'SGD':
         optimizer = keras.optimizers.SGD(**train_property['optimizer']['kwargs'])
