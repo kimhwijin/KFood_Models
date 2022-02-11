@@ -68,7 +68,7 @@ tf.data.Dataset 을 이용한 데이터 파이프라인 구축 : [kfood_dataset.
 - SGD
 
 
-|모델|정확도(테스트 세트)|Learning Rate|Momentum|Nestrov|Learning Rate Decay|
+|모델|정확도(테스트 세트)|Learning Rate|Momentum|Nesterov|Learning Rate Decay|
 |---|---|---|---|---|---|
 |KerasInceptionResNetV2|-|0.01|0.9|True|0.001(linear)|
 |InceptionResNetV2|-|0.01|0.9|True|0.001(linear)|
