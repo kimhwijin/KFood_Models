@@ -4,6 +4,7 @@ from tensorflow import keras
 import numpy as np
 from pathlib import Path
 import pickle
+import os
 
 class WeightsSaver(keras.callbacks.Callback):
     def __init__(self, weights_save_path, epochs, **kwargs):
@@ -71,6 +72,7 @@ def train(
     
     weights_save_path = weights_save_path / model_name / train_property_name
     
+    os.makedirs(weights_save_path, exist_ok=True)
     with open(weights_save_path / "train_property.pkl", "wb") as f:
         pickle.dump(train_property, f)
 
