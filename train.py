@@ -57,7 +57,7 @@ def train(
     elif model_name=='InceptionResNetV2':
         from application.inception_resnet_v2 import InceptionResNetV2
         model = InceptionResNetV2()
-    elif model_name=='InceptionResNetV2':
+    elif model_name=='SmallKerasInceptionResNetV2':
         from application.small_keras_inception_resnet_v2 import SmallKerasInceptionResNetV2
         model = SmallKerasInceptionResNetV2()
 
