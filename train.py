@@ -43,7 +43,6 @@ def train(
         },
         'batch': 32,
         'crop' : 'random',
-        'regularization': 'l1',
     },
     lr_schedule=True,
     model_name='KerasInceptionResNetV2',
@@ -58,6 +57,9 @@ def train(
     elif model_name=='InceptionResNetV2':
         from application.inception_resnet_v2 import InceptionResNetV2
         model = InceptionResNetV2()
+    elif model_name=='InceptionResNetV2':
+        from application.small_keras_inception_resnet_v2 import SmallKerasInceptionResNetV2
+        model = SmallKerasInceptionResNetV2()
 
     train_property_name = train_property['optimizer']['name']
     train_property_name += '_lr:' + str(train_property['optimizer']['kwargs']['learning_rate'])
