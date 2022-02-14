@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from tensorflow import keras
 import numpy as np
 from pathlib import Path
+import pickle
 
 class WeightsSaver(keras.callbacks.Callback):
     def __init__(self, weights_save_path, epochs, **kwargs):
@@ -42,6 +43,7 @@ def train(
         },
         'batch': 32,
         'crop' : 'random',
+        'regularization': 'l1',
     },
     lr_schedule=True,
     model_name='KerasInceptionResNetV2',
@@ -66,6 +68,9 @@ def train(
     
     
     weights_save_path = weights_save_path / model_name / train_property_name
+    
+    with open(weights_save_path / "train_property.pkl", "wb") as f:
+        pickle.dump(train_property, f)
 
     if pretrained:
         model.load_weights(weights_save_path / 'best.weights')
@@ -88,7 +93,7 @@ def train(
     if lr_schedule:
         lr_decay = train_property['optimizer']['lr_decay']
         callbacks.append(keras.callbacks.LearningRateScheduler(
-            lambda epoch, lr: lr * lr_decay if epoch % 2 == 0 else lr
+            lambda epoch, lr: lr * lr_decay if epoch % 2 == 1 else lr
         ))
 
     if train_property['optimizer']['name'] == 'SGD':
