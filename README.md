@@ -83,6 +83,7 @@ tf.data.Dataset 을 이용한 데이터 파이프라인 구축 : [kfood_dataset.
 |KerasInceptionResNetV2|73%(99.67%)|50|0.001|0.9|0.9|1.0|-|
 |InceptionResNetV2|89.7%(96%)|70|0.045|0.9|0.0|1.0|0.94(exp, per 2 epochs)|
 |KerasInceptionResNetV2SEBlock|-|-|0.045|0.9|0.0|1.0|0.94(exp, per 2 epochs)|
+|SmallKerasInceptionResNetV2|96%(97%)|150|0.045|0.9|1.0|0.94(exp, per 2 epochs)|
 
 - Decay
   - initial learning rate : 0.045, exp decay per 2 epochs : 0.9
