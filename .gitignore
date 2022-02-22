@@ -1,9 +1,8 @@
-__pycache__
-.ipynb_checkpoints
 kfood/
-.ipynb_checkpoints
-.DS_Store
 kfood.zip
-__pycache__
+model/
 
-best
+
+.ipynb_checkpoints
+__pycache__
+.DS_Store
