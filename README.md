@@ -58,9 +58,9 @@ tf.data.Dataset 을 이용한 데이터 파이프라인 구축 : [kfood_dataset.
 
 |모델 이름|구조|파라미터|훈련 에폭|정확도|
 |---|---|---|---|---|
-|KerasInceptionResNetV2|[Structure](https://github.com/kimhwijin/korean_food_classifier/blob/master/application/keras_inception_resnet_v2.py)|54,567k|50|94.3%|
+|KerasInceptionResNetV2|[Structure](https://github.com/kimhwijin/korean_food_classifier/blob/master/application/keras_inception_resnet_v2.py)|54,567k|50|94.8%|
 |InceptionResNetV2|[Structure](https://github.com/kimhwijin/korean_food_classifier/blob/master/application/inception_resnet_v2.py)|30,627k|70|95%|
-|KerasInceptionResNetV2SEBlock|[Structure](https://github.com/kimhwijin/korean_food_classifier/blob/master/application/keras_inception_resnet_v2_se.py)|60,696k|80|89.7%|
+|KerasInceptionResNetV2SEBlock|[Structure](https://github.com/kimhwijin/korean_food_classifier/blob/master/application/keras_inception_resnet_v2_se.py)|60,696k|50|94.8%|
 |SmallKerasInceptionResNetV2|[Structure](https://github.com/kimhwijin/korean_food_classifier/blob/master/application/small_keras_inception_resnet_v2.py)|24,514k|150|96.8%|
 
 ## Optimizer
