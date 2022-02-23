@@ -18,7 +18,7 @@ model.load_weights(MODEL_PATH)
 
 LABELS = []
 CLASSES = []
-with open('class_to_label.txt','r', encoding='utf8') as f:
+with open(os.path.join(str(Path(__file__).parent.parent),'class_to_label.txt'),'r', encoding='utf8') as f:
     for line in f.readlines():
         _label, _class = line.strip().split(',')
         LABELS.append(int(_label))
@@ -31,5 +31,5 @@ def predict():
     print(images.shape)
     predicts = model.predict(images)  # n x 150
     labels = np.argmax(predicts, axis=1) # n
-    return CLASSES[labels]
+    return images, CLASSES[labels]
 
