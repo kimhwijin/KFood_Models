@@ -28,7 +28,6 @@ CLASSES = np.array(CLASSES)
 
 def predict():
     images = preprocess() # n x 299 x 299 x 3
-    print(images.shape)
     predicts = model.predict(images)  # n x 150
     labels = np.argmax(predicts, axis=1) # n
     return images, CLASSES[labels]
