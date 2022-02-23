@@ -4,14 +4,19 @@ from pathlib import Path
 import os
 
 IMAGE_SIZE = (299, 299)
+PREDICT_PATH = os.path.join(str(Path(__file__).parent), "predict_images")
 
 def preprocess_to_npy(image_path, target_dir):
     image_name = Path(image_path).name.split('.')[0]
-    image = parse_images(image_path)
+    image = parse_image(image_path)
     crop_image = crop_and_resize(image)
     np.save("{}/{}.npy".format(target_dir, image_name), crop_image)
 
-def parse_images(filepath):
+def preprocess():
+    image_names = os.listdir(PREDICT_PATH)
+    return [crop_and_resize(parse_image(os.path.join(PREDICT_PATH, image_name))) for image_name in image_names]
+    
+def parse_image(filepath):
     image = tf.io.read_file(filepath)
     filepath = tf.compat.path_to_str(filepath)
     image = tf.image.decode_image(image, channels=3, expand_animations=False)
@@ -37,4 +42,5 @@ def images_to_samples():
         preprocess_to_npy("predict/test_images/" + image_path, "predict/test_samples")
 
 if __name__ == "__main__":
-    images_to_samples()
+    print(PREDICT_PATH)
+    #images_to_samples()

@@ -1,29 +1,30 @@
 import os
-import googleapiclient.discovery
+from predict.preprocess import preprocess
+from tensorflow import keras
+import tensorflow as tf
+from application.small_keras_inception_resnet_v2 import SmallKerasInceptionResNetV2
 import numpy as np
-output_name = "dense"
+from pathlib import Path
+MODEL_PATH = os.path.join(str(Path(__file__).parent.parent), "model", "best", "best.weights")
 
+model = SmallKerasInceptionResNetV2()
+model.load_weights(MODEL_PATH)
 
+LABELS = []
+CLASSES = []
+with open('class_to_label.txt','r', encoding='utf8') as f:
+    for line in f.readlines():
+        _label, _class = line.strip().split(',')
+        LABELS.append(int(_label))
+        CLASSES.append(_class)
+LABELS = np.array(LABELS)
+CLASSES = np.array(CLASSES)
 
-project_id = "direct-byte-309104"
-model_id = "korean_food_classifier"
-model_path = "projects/{}/models/{}".format(project_id, model_id)
-ml_resource = googleapiclient.discovery.build("ml", "v1").projects()
-
-def predict(X):
-    input_data_json = {
-        "signature_name": "serving_defult",
-        "instances": X.tolist()
-    }
-
-    request = ml_resource.predict(name=model_path, body=input_data_json)
-    response = request.execute()
-    if "error" in response:
-        raise RuntimeError(response["error"])
-    return np.array([pred[output_name] for pred in response["predictions"]])
-
-
-if __name__ == "__main__":
-    np_paths = os.listdir("test_samples")
-    samples = [np.load(np_path) for np_path in np_paths]
-    predicts = [predict(sample) for sample in samples]
+def predict():
+    images = preprocess() # n x 299 x 299 x 3
+    predicts = model.predict(images)  # n x 150
+    labels = np.argmax(predicts, axis=1) # n
+    return CLASSES[labels]
+    
+    
+    
