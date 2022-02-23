@@ -14,7 +14,7 @@ def preprocess_to_npy(image_path, target_dir):
 
 def preprocess():
     image_names = os.listdir(PREDICT_PATH)
-    return [crop_and_resize(parse_image(os.path.join(PREDICT_PATH, image_name))) for image_name in image_names]
+    return np.array([crop_and_resize(parse_image(os.path.join(PREDICT_PATH, image_name))) for image_name in image_names])
     
 def parse_image(filepath):
     image = tf.io.read_file(filepath)
