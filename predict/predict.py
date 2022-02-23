@@ -8,7 +8,10 @@ from tensorflow import keras
 import tensorflow as tf
 from application.small_keras_inception_resnet_v2 import SmallKerasInceptionResNetV2
 import numpy as np
+
 MODEL_PATH = os.path.join(str(Path(__file__).parent.parent), "model", "best", "best.weights")
+if not os.path.exists(MODEL_PATH):
+    MODEL_PATH = os.path.join(os.getcwd(), "drive", "MyDrive", "Model", "kfood", "best", "best.weights")
 
 model = SmallKerasInceptionResNetV2()
 model.load_weights(MODEL_PATH)
